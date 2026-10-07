@@ -7,8 +7,10 @@
 #include "utils.h"
 #include "hash_table.h"
 #include "linked_list.h"
+#include "linked_list_iterator.h"
 #include "backend.h"
 #include "common.h"
+
 
 struct merch{
   char* name;
@@ -22,11 +24,9 @@ struct shelf{
   int quantity;
 };
 
-
-void add_merch_item(ioopm_hash_table_t *ht, merch_t *merch)
+static bool check_loc_empty(ioopm_hash_table_t *ht, char *location)
 {
-  elem_t elem = ptr_elem(merch);
-  ioopm_hash_table_insert(ht, merch->name, elem);
+  return !ioopm_hash_table_has_key(ht, location);
 }
 
 merch_t *create_merch_item(char *name)
@@ -37,8 +37,25 @@ merch_t *create_merch_item(char *name)
   return merch;
 }
 
-void add_merch_loc(merch_t *merch, shelf_t *shelf)
+void destroy_merch_item(merch_t *merch)
 {
-  if(check_loc_empty(shelf->location)) ioopm_list_append(merch->locs, ptr_elem(shelf)); //DODGE
-  
+  ioopm_list_destroy(merch->locs);
+  free(merch);
+}
+
+void add_merch_item(ioopm_hash_table_t *merch_ht, merch_t *merch)
+{
+  elem_t elem = ptr_elem(merch);
+  ioopm_hash_table_insert(merch_ht, merch->name, elem);
+}
+
+bool add_merch_loc(ioopm_hash_table_t *storage_ht, merch_t *merch, shelf_t *shelf)
+{
+  if(check_loc_empty(storage_ht, shelf->location) && is_storage_nmr(shelf->location)) //DODGE 
+  {
+    ioopm_list_append(merch->locs, ptr_elem(shelf));
+    return true;
+  }
+
+  return false;
 }
