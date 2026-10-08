@@ -24,6 +24,9 @@ union elem
   char *s;
 };
 
+typedef bool ioopm_eq_function(elem_t a, elem_t b);
+typedef size_t ioopm_hash_function(elem_t key);
+
 #define int_elem(x)   ((elem_t) { .i = (x) })
 #define bool_elem(x)  ((elem_t) { .b = (x) })
 #define ptr_elem(x)   ((elem_t) { .p = (x) })
