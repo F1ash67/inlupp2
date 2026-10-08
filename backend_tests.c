@@ -19,13 +19,13 @@ int clean_suite(void)
 void test_create_destroy()
 {
   ioopm_hash_table_t *merch_ht = ioopm_hash_table_create();
-  merch_t *shirt = create_merch_item("shirt");
-  add_merch_item(merch_ht, shirt);
+  ioopm_hash_table_t *storage_ht = ioopm_hash_table_create();
+  create_merch_item(merch_ht, "shirt", "a shirt", 100);
   elem_t result;
-  CU_ASSERT_PTR_NOT_NULL(shirt);
   CU_ASSERT_TRUE(ioopm_hash_table_lookup(merch_ht, "shirt", &result));
 
-  destroy_merch_item(merch_ht, shirt);
+  remove_merch_item(storage_ht, merch_ht, "shirt");
+  ioopm_hash_table_destroy(storage_ht);
   ioopm_hash_table_destroy(merch_ht);
 }
 
@@ -34,18 +34,13 @@ void test_add_item_to_storage()
   ioopm_hash_table_t *merch_ht = ioopm_hash_table_create();
   ioopm_hash_table_t *storage_ht = ioopm_hash_table_create();
 
-  merch_t *shirt = create_merch_item("shirt");
-  merch_t *pants = create_merch_item("pants");
-  shelf_t *shelf = create_shelf("A23", 10);
-
-  add_merch_item(merch_ht, shirt);
-  add_merch_item(merch_ht, pants);
-
+  create_merch_item(merch_ht, "shirt", "a shirt", 100);
+  create_merch_item(merch_ht, "pants", "a pant", 150);
   elem_t result;
   CU_ASSERT_TRUE(ioopm_hash_table_lookup(merch_ht, "shirt", &result));
 
-  CU_ASSERT_TRUE(add_merch_loc(storage_ht, shirt, shelf));
-  CU_ASSERT_FALSE(add_merch_loc(storage_ht, pants, shelf));
+  CU_ASSERT_TRUE(replenish_merch_item(storage_ht, merch_ht, "shirt", "A23"));
+  CU_ASSERT_FALSE(replenish_merch_item(storage_ht, merch_ht, "pants", "A23"));
 
   destroy_all_merch(merch_ht, storage_ht);
 
@@ -57,25 +52,41 @@ void test_add_item_to_multiple_storage()
 {
   ioopm_hash_table_t *merch_ht = ioopm_hash_table_create();
   ioopm_hash_table_t *storage_ht = ioopm_hash_table_create();
-
-  merch_t *shirt = create_merch_item("shirt");
-  merch_t *pants = create_merch_item("pants");
-  shelf_t *shelf1 = create_shelf("A23", 10);
-  shelf_t *shelf2 = create_shelf("B54", 20);
-  shelf_t *shelf3 = create_shelf("C89", 30);
-
-  add_merch_item(merch_ht, shirt);
-  add_merch_item(merch_ht, pants);
+  create_merch_item(merch_ht, "shirt", "a shirt", 100);
+  create_merch_item(merch_ht, "pants", "a pant", 150);
 
   
-  CU_ASSERT_TRUE(add_merch_loc(storage_ht, shirt, shelf1));
-  CU_ASSERT_TRUE(add_merch_loc(storage_ht, shirt, shelf2));
-  CU_ASSERT_TRUE(add_merch_loc(storage_ht, pants, shelf3));
+  CU_ASSERT_TRUE(replenish_merch_item(storage_ht, merch_ht, "shirt", "A23"));
+  CU_ASSERT_TRUE(replenish_merch_item(storage_ht, merch_ht, "shirt", "B54"));
+  CU_ASSERT_TRUE(replenish_merch_item(storage_ht, merch_ht, "shirt", "A23"));
+  CU_ASSERT_TRUE(replenish_merch_item(storage_ht, merch_ht, "pants", "C89"));
 
   elem_t result;
   CU_ASSERT_TRUE(ioopm_hash_table_lookup(merch_ht, "shirt", &result));
 
-  
+  destroy_all_merch(merch_ht, storage_ht);
+
+  ioopm_hash_table_destroy(merch_ht);
+  ioopm_hash_table_destroy(storage_ht);
+}
+
+void test_quantity()
+{
+  ioopm_hash_table_t *merch_ht = ioopm_hash_table_create();
+  ioopm_hash_table_t *storage_ht = ioopm_hash_table_create();
+  create_merch_item(merch_ht, "shirt", "a shirt", 100);
+  create_merch_item(merch_ht, "pants", "a pant", 150);
+
+  replenish_merch_item(storage_ht, merch_ht, "shirt", "A23");
+  replenish_merch_item(storage_ht, merch_ht, "shirt", "B54");
+  replenish_merch_item(storage_ht, merch_ht, "shirt", "A23");
+  replenish_merch_item(storage_ht, merch_ht, "pants", "C89");
+
+  int quantity_shirt = get_tot_quantity(merch_ht, "shirt");
+  int quantity_pants = get_tot_quantity(merch_ht, "pants");
+
+  CU_ASSERT_EQUAL(quantity_shirt, 3);
+  CU_ASSERT_EQUAL(quantity_pants, 1);
 
   destroy_all_merch(merch_ht, storage_ht);
 
@@ -108,6 +119,7 @@ int main()
       (CU_add_test(backend_test_suite, "Create destroy merch", test_create_destroy) == NULL) ||
       (CU_add_test(backend_test_suite, "Add merch to storage", test_add_item_to_storage) == NULL) ||
       (CU_add_test(backend_test_suite, "Add multiple merch to storage", test_add_item_to_multiple_storage) == NULL) ||
+      (CU_add_test(backend_test_suite, "Check quantity of merch", test_quantity) == NULL) ||
       0)
   {
     // If adding any of the tests fails, we tear down CUnit and exit

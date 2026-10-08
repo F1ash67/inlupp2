@@ -2,20 +2,21 @@
 
 #include <stdbool.h>
 #include "hash_table.h"
+#include "linked_list.h"
 
 typedef struct merch merch_t;
 typedef struct shelf shelf_t;
 
-merch_t *create_merch_item(char *name);
+merch_t *create_merch_item(ioopm_hash_table_t *merch_ht, char *name, char *desc, size_t price);
 
-void destroy_merch_item(ioopm_hash_table_t *merch_ht, merch_t *merch);
+void remove_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *merch_ht, char *name);
 
-void add_merch_item(ioopm_hash_table_t *merch_ht, merch_t *merch);
+void edit_merch_item(ioopm_hash_table_t *merch_ht, char *name, char *new_name, char *new_desc, size_t new_price);
 
-bool add_merch_loc(ioopm_hash_table_t *storage_ht, merch_t *merch, shelf_t *shelf);
+bool replenish_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *merch_ht, char *name, char *location);
 
-shelf_t *create_shelf(char *location, int quantity);
+ioopm_list_t *get_stock(ioopm_hash_table_t *ht, char *name);
 
-void destroy_shelf(shelf_t *shelf);
+size_t get_tot_quantity(ioopm_hash_table_t *merch_ht, char* name);
 
 void destroy_all_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht);
