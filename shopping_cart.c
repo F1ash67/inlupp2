@@ -10,11 +10,12 @@
 
 size_t cart = 0;
 
-void create_cart(ioopm_list_t *carts) {
+size_t create_cart(ioopm_list_t *carts) {
     ioopm_hash_table_t *sc = ioopm_hash_table_create(str_hash, str_eq);
     
     ioopm_list_append(carts, ptr_elem(sc));
     cart++;
+    return cart;
 }
 
 void remove_cart(ioopm_list_t *carts, size_t id) {
@@ -36,7 +37,7 @@ void remove_from_cart(ioopm_list_t *carts, size_t id, char *merch, size_t amount
     ioopm_hash_table_insert(sc, string_elem(merch), int_elem(result.i - amount));
 }
 
-int calculate_cost(ioopm_list_t *carts, ioopm_hash_table_t *merch_ht, size_t id) {
+size_t calculate_cost(ioopm_list_t *carts, ioopm_hash_table_t *merch_ht, size_t id) {
     ioopm_hash_table_t *sc = ioopm_list_get(carts, id).p;
 
     ioopm_hash_table_iterator_t *it = ioopm_hash_table_iterator_create(sc);
