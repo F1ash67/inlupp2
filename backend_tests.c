@@ -1,6 +1,6 @@
 #include <CUnit/Basic.h>
 #include "backend.h"
-#include "hash_table.h"
+#include "hash_table_general_key.h"
 
 int init_suite(void)
 {
@@ -18,11 +18,11 @@ int clean_suite(void)
 
 void test_create_destroy()
 {
-  ioopm_hash_table_t *merch_ht = ioopm_hash_table_create();
-  ioopm_hash_table_t *storage_ht = ioopm_hash_table_create();
+  ioopm_hash_table_t *merch_ht = ioopm_hash_table_create(str_hash, str_eq);
+  ioopm_hash_table_t *storage_ht = ioopm_hash_table_create(str_hash, str_eq);
   create_merch_item(merch_ht, "shirt", "a shirt", 100);
   elem_t result;
-  CU_ASSERT_TRUE(ioopm_hash_table_lookup(merch_ht, "shirt", &result));
+  CU_ASSERT_TRUE(ioopm_hash_table_lookup(merch_ht, string_elem("shirt"), &result));
 
   remove_merch_item(storage_ht, merch_ht, "shirt");
   ioopm_hash_table_destroy(storage_ht);
@@ -31,13 +31,13 @@ void test_create_destroy()
 
 void test_add_item_to_storage()
 {
-  ioopm_hash_table_t *merch_ht = ioopm_hash_table_create();
-  ioopm_hash_table_t *storage_ht = ioopm_hash_table_create();
+  ioopm_hash_table_t *merch_ht = ioopm_hash_table_create(str_hash, str_eq);
+  ioopm_hash_table_t *storage_ht = ioopm_hash_table_create(str_hash, str_eq);
 
   create_merch_item(merch_ht, "shirt", "a shirt", 100);
   create_merch_item(merch_ht, "pants", "a pant", 150);
   elem_t result;
-  CU_ASSERT_TRUE(ioopm_hash_table_lookup(merch_ht, "shirt", &result));
+  CU_ASSERT_TRUE(ioopm_hash_table_lookup(merch_ht, string_elem("shirt"), &result));
 
   CU_ASSERT_TRUE(replenish_merch_item(storage_ht, merch_ht, "shirt", "A23"));
   CU_ASSERT_FALSE(replenish_merch_item(storage_ht, merch_ht, "pants", "A23"));
@@ -50,8 +50,8 @@ void test_add_item_to_storage()
 
 void test_add_item_to_multiple_storage()
 {
-  ioopm_hash_table_t *merch_ht = ioopm_hash_table_create();
-  ioopm_hash_table_t *storage_ht = ioopm_hash_table_create();
+  ioopm_hash_table_t *merch_ht = ioopm_hash_table_create(str_hash, str_eq);
+  ioopm_hash_table_t *storage_ht = ioopm_hash_table_create(str_hash, str_eq);
   create_merch_item(merch_ht, "shirt", "a shirt", 100);
   create_merch_item(merch_ht, "pants", "a pant", 150);
 
@@ -62,7 +62,7 @@ void test_add_item_to_multiple_storage()
   CU_ASSERT_TRUE(replenish_merch_item(storage_ht, merch_ht, "pants", "C89"));
 
   elem_t result;
-  CU_ASSERT_TRUE(ioopm_hash_table_lookup(merch_ht, "shirt", &result));
+  CU_ASSERT_TRUE(ioopm_hash_table_lookup(merch_ht, string_elem("shirt"), &result));
 
   destroy_all_merch(merch_ht, storage_ht);
 
@@ -72,8 +72,8 @@ void test_add_item_to_multiple_storage()
 
 void test_quantity()
 {
-  ioopm_hash_table_t *merch_ht = ioopm_hash_table_create();
-  ioopm_hash_table_t *storage_ht = ioopm_hash_table_create();
+  ioopm_hash_table_t *merch_ht = ioopm_hash_table_create(str_hash, str_eq);
+  ioopm_hash_table_t *storage_ht = ioopm_hash_table_create(str_hash, str_eq);
   create_merch_item(merch_ht, "shirt", "a shirt", 100);
   create_merch_item(merch_ht, "pants", "a pant", 150);
 
@@ -82,8 +82,8 @@ void test_quantity()
   replenish_merch_item(storage_ht, merch_ht, "shirt", "A23");
   replenish_merch_item(storage_ht, merch_ht, "pants", "C89");
 
-  int quantity_shirt = get_tot_quantity(merch_ht, "shirt");
-  int quantity_pants = get_tot_quantity(merch_ht, "pants");
+  int quantity_shirt = get_tot_stock(merch_ht, "shirt");
+  int quantity_pants = get_tot_stock(merch_ht, "pants");
 
   CU_ASSERT_EQUAL(quantity_shirt, 3);
   CU_ASSERT_EQUAL(quantity_pants, 1);

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
-#include "hash_table.h"
+#include "hash_table_general_key.h"
 #include "linked_list.h"
 
 typedef struct merch merch_t;
@@ -19,8 +19,8 @@ void edit_merch_item(ioopm_hash_table_t *merch_ht, char *name, char *new_name, c
 
 bool replenish_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *merch_ht, char *name, char *location);
 
-ioopm_list_t *get_stock(ioopm_hash_table_t *ht, char *name);
+ioopm_list_t *get_stock_list(ioopm_hash_table_t *ht, char *name);
 
-size_t get_tot_quantity(ioopm_hash_table_t *merch_ht, char* name);
+size_t get_tot_stock(ioopm_hash_table_t *merch_ht, char* name);
 
 void destroy_all_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht);

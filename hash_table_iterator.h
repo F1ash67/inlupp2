@@ -1,5 +1,5 @@
 #pragma once
-#include "hash_table.h"
+#include "hash_table_general_key.h"
 #include <stdbool.h>
 #include "common.h"
 
@@ -40,7 +40,7 @@ void ioopm_hash_table_iterator_advance(ioopm_hash_table_iterator_t *it);
 /// @pre it is positioned at an entry
 /// @param it iterator operated upon
 /// @return the key of the current entry
-char *ioopm_hash_table_iterator_current_key(ioopm_hash_table_iterator_t *it);
+elem_t ioopm_hash_table_iterator_current_key(ioopm_hash_table_iterator_t *it);
 
 /// @brief Get the value of the current entry
 /// @pre it is positioned at an entry

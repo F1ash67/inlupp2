@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include <assert.h>
 #include "backend.h"
-#include "hash_table.h"
+#include "hash_table_general_key.h"
 #include "hash_table_iterator.h"
 #include "linked_list.h"
 #include "linked_list_iterator.h"
@@ -26,7 +26,7 @@ struct shelf{
 
 static bool location_empty(ioopm_hash_table_t *storage_ht, char *location)
 {
-  return !ioopm_hash_table_has_key(storage_ht, location);
+  return !ioopm_hash_table_has_key(storage_ht, string_elem(location));
 }
 
 static bool is_storage_nmr(char *str)
@@ -65,7 +65,7 @@ merch_t *find_merch_item(ioopm_hash_table_t *merch_ht, char *name)
 {
   elem_t result;
   
-  assert(ioopm_hash_table_lookup(merch_ht, name, &result));
+  assert(ioopm_hash_table_lookup(merch_ht, string_elem(name), &result));
   merch_t *merch = result.p;
   return merch;
 }
@@ -83,26 +83,26 @@ merch_t *create_merch_item(ioopm_hash_table_t *merch_ht, char *name, char *desc,
   merch->price = price;
   merch->locs = ioopm_list_create();
   
-  ioopm_hash_table_insert(merch_ht, merch->name, ptr_elem(merch));
+  ioopm_hash_table_insert(merch_ht, string_elem(merch->name), ptr_elem(merch));
   return merch;
 }
 
 void remove_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *merch_ht, char *name)
 { 
   merch_t *merch = find_merch_item(merch_ht, name);
-  ioopm_list_t *list = get_stock(merch_ht, name);
+  ioopm_list_t *list = get_stock_list(merch_ht, name);
   elem_t result;
   ioopm_list_iterator_t *it = ioopm_list_iterator_create(list);
   while (!ioopm_list_iterator_at_end(it))
   {
     shelf_t *shelf = ioopm_list_iterator_remove(it).p;
-    ioopm_hash_table_remove(storage_ht, shelf->location, &result);
+    ioopm_hash_table_remove(storage_ht, string_elem(shelf->location), &result);
     destroy_shelf(shelf);
   }
   ioopm_list_iterator_destroy(it);
   
   ioopm_list_destroy(list);
-  ioopm_hash_table_remove(merch_ht, name, &result);
+  ioopm_hash_table_remove(merch_ht, string_elem(name), &result);
   free(merch);
 }
 
@@ -116,7 +116,7 @@ void edit_merch_item(ioopm_hash_table_t *merch_ht, char *name, char *new_name, c
 
 bool replenish_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *merch_ht, char *name, char *location)
 {
-  ioopm_list_t *stock_list = get_stock(merch_ht, name);
+  ioopm_list_t *stock_list = get_stock_list(merch_ht, name);
   ioopm_list_iterator_t *stock_list_iter = ioopm_list_iterator_create(stock_list);
   while (!ioopm_list_iterator_at_end(stock_list_iter))
   {
@@ -136,20 +136,20 @@ bool replenish_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *me
 
   shelf_t *new_shelf = create_shelf(location, 1);
 
-  ioopm_hash_table_insert(storage_ht, location, string_elem(name));
+  ioopm_hash_table_insert(storage_ht, string_elem(name), string_elem(name));
   ioopm_list_append(stock_list, ptr_elem(new_shelf));
   return true;
 }
 
-ioopm_list_t *get_stock(ioopm_hash_table_t *merch_ht, char *name)
+ioopm_list_t *get_stock_list(ioopm_hash_table_t *merch_ht, char *name)
 {
   merch_t *merch = find_merch_item(merch_ht, name);
   return merch->locs;
 }
 
-size_t get_tot_quantity(ioopm_hash_table_t *merch_ht, char* name)
+size_t get_tot_stock(ioopm_hash_table_t *merch_ht, char* name)
 {
-  ioopm_list_t *list = get_stock(merch_ht, name);
+  ioopm_list_t *list = get_stock_list(merch_ht, name);
   ioopm_list_iterator_t *it = ioopm_list_iterator_create(list);
   size_t tot = 0;
   while (!ioopm_list_iterator_at_end(it))
