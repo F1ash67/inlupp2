@@ -10,6 +10,8 @@
 #include "hash_table_general_key.h"
 #include "hash_table_iterator.h"
 
+//To-Do: Shopping cart actions
+
 void print_menu(void)
 {
   fprintf(stdout, "[A]: Add merchandise\n" 
@@ -47,7 +49,7 @@ void add_merch(ioopm_hash_table_t *merch_ht) {
 }
 
 void list_merch(ioopm_hash_table_t *merch_ht) {
-
+  //Finish with calling list merch function
 }
 
 void remove_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) {

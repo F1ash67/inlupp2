@@ -57,7 +57,11 @@ static shelf_t *create_shelf(char *location, int quantity)
   return shelf;
 }
 
-static merch_t *find_merch_item(ioopm_hash_table_t *merch_ht, char *name)
+size_t get_price(merch_t *merch) {
+  merch->price;
+}
+
+merch_t *find_merch_item(ioopm_hash_table_t *merch_ht, char *name)
 {
   elem_t result;
   

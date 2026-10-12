@@ -7,6 +7,10 @@
 typedef struct merch merch_t;
 typedef struct shelf shelf_t;
 
+size_t get_price(merch_t *merch);
+
+merch_t *find_merch_item(ioopm_hash_table_t *merch_ht, char *name);
+
 merch_t *create_merch_item(ioopm_hash_table_t *merch_ht, char *name, char *desc, size_t price);
 
 void remove_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *merch_ht, char *name);
