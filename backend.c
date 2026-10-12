@@ -58,7 +58,12 @@ static shelf_t *create_shelf(char *location, int quantity)
 }
 
 size_t get_price(merch_t *merch) {
-  merch->price;
+  return merch->price;
+}
+
+char *get_name(merch_t *merch)
+{
+  return merch->name;
 }
 
 merch_t *find_merch_item(ioopm_hash_table_t *merch_ht, char *name)
@@ -114,6 +119,19 @@ void edit_merch_item(ioopm_hash_table_t *merch_ht, char *name, char *new_name, c
   merch->price = new_price;
 }
 
+ioopm_list_t *list_merch(ioopm_hash_table_t *merch_ht)
+{
+  ioopm_hash_table_iterator_t *merch_it = ioopm_hash_table_iterator_create(merch_ht);
+  ioopm_list_t *merch_list = ioopm_list_create();
+  while(!ioopm_hash_table_iterator_at_end(merch_it))
+  {
+    ioopm_list_append(merch_list, ioopm_hash_table_iterator_current_value(merch_it));
+    ioopm_hash_table_iterator_advance(merch_it);
+  }
+  ioopm_hash_table_iterator_destroy(merch_it);
+  return merch_list;
+}
+
 bool replenish_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *merch_ht, char *name, char *location)
 {
   ioopm_list_t *stock_list = get_stock_list(merch_ht, name);
@@ -136,9 +154,29 @@ bool replenish_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *me
 
   shelf_t *new_shelf = create_shelf(location, 1);
 
-  ioopm_hash_table_insert(storage_ht, string_elem(name), string_elem(name));
+  ioopm_hash_table_insert(storage_ht, string_elem(location), string_elem(name));
   ioopm_list_append(stock_list, ptr_elem(new_shelf));
   return true;
+}
+
+void remove_stock(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, char *name, size_t amt)
+{
+  ioopm_list_t *stock_list = get_stock_list(merch_ht, name);
+  ioopm_list_iterator_t *stock_list_iter = ioopm_list_iterator_create(stock_list);
+  for(size_t i = 0; i < amt; i++)
+  {
+    if(ioopm_list_iterator_at_end(stock_list_iter)) return;
+    shelf_t *current = ioopm_list_iterator_current(stock_list_iter).p;
+    if(current->quantity <= 0)
+    {
+      ioopm_list_iterator_remove(stock_list_iter);
+      elem_t result;
+      ioopm_hash_table_remove(storage_ht, string_elem(current->location), &result);
+      i--;
+      continue;
+    }
+    current->quantity--;
+  }
 }
 
 ioopm_list_t *get_stock_list(ioopm_hash_table_t *merch_ht, char *name)
