@@ -133,12 +133,11 @@ void test_remove_stock()
   remove_stock(merch_ht, storage_ht, "shirt", 2);
   CU_ASSERT_EQUAL(get_tot_stock(merch_ht, "shirt"), 1);
 
-  remove_stock(merch_ht, storage_ht, "pants", 2);
+  remove_stock(merch_ht, storage_ht, "pants", 1);
   ioopm_list_t *stock_list = get_stock_list(merch_ht, "pants");
-  CU_ASSERT_TRUE(ioopm_list_head(stock_list).p == NULL);
-
+  CU_ASSERT_TRUE(ioopm_list_is_empty(stock_list));
+  
   destroy_all_merch(merch_ht, storage_ht);
-  ioopm_list_destroy(stock_list);
   ioopm_hash_table_destroy(merch_ht);
   ioopm_hash_table_destroy(storage_ht);
 }
@@ -170,6 +169,7 @@ int main()
       (CU_add_test(backend_test_suite, "Add multiple merch to storage", test_add_item_to_multiple_storage) == NULL) ||
       (CU_add_test(backend_test_suite, "Check quantity of merch", test_quantity) == NULL) ||
       (CU_add_test(backend_test_suite, "List all merch", test_merch_list) == NULL) ||
+      (CU_add_test(backend_test_suite, "Remove stock", test_remove_stock) == NULL) ||
       0)
   {
     // If adding any of the tests fails, we tear down CUnit and exit

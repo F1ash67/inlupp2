@@ -111,12 +111,19 @@ void remove_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *merch
   free(merch);
 }
 
-void edit_merch_item(ioopm_hash_table_t *merch_ht, char *name, char *new_name, char*new_desc, size_t new_price)
+void edit_merch_item(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, char *name, char *new_name, char*new_desc, size_t new_price)
 {
   merch_t *merch = find_merch_item(merch_ht, name);
+  ioopm_list_t *stock_list = get_stock_list(merch_ht, name);
   merch->name = new_name;
   merch->desc = new_desc;
   merch->price = new_price;
+  ioopm_list_iterator_t *stock_list_iter = ioopm_list_iterator_create(stock_list);
+  while (!ioopm_list_iterator_at_end(stock_list_iter))
+  {
+    shelf_t *current = ioopm_list_iterator_current(stock_list_iter).p;
+    ioopm_hash_table_insert(storage_ht, string_elem(current->location), string_elem(new_name));
+  }
 }
 
 ioopm_list_t *list_merch(ioopm_hash_table_t *merch_ht)
@@ -161,22 +168,29 @@ bool replenish_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *me
 
 void remove_stock(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, char *name, size_t amt)
 {
+  assert(amt<=get_tot_stock(merch_ht, name));
   ioopm_list_t *stock_list = get_stock_list(merch_ht, name);
   ioopm_list_iterator_t *stock_list_iter = ioopm_list_iterator_create(stock_list);
   for(size_t i = 0; i < amt; i++)
   {
-    if(ioopm_list_iterator_at_end(stock_list_iter)) return;
+    if(ioopm_list_iterator_at_end(stock_list_iter)) 
+    {
+      ioopm_list_iterator_destroy(stock_list_iter);
+      return;
+    }
     shelf_t *current = ioopm_list_iterator_current(stock_list_iter).p;
+    current->quantity--;
     if(current->quantity <= 0)
     {
-      ioopm_list_iterator_remove(stock_list_iter);
-      elem_t result;
-      ioopm_hash_table_remove(storage_ht, string_elem(current->location), &result);
-      i--;
-      continue;
+        char *location = current->location;
+        ioopm_list_iterator_remove(stock_list_iter);
+
+        elem_t result;
+        ioopm_hash_table_remove(storage_ht, string_elem(location), &result);
+        destroy_shelf(current);
     }
-    current->quantity--;
   }
+  ioopm_list_iterator_destroy(stock_list_iter);
 }
 
 ioopm_list_t *get_stock_list(ioopm_hash_table_t *merch_ht, char *name)

@@ -17,7 +17,7 @@ merch_t *create_merch_item(ioopm_hash_table_t *merch_ht, char *name, char *desc,
 
 void remove_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *merch_ht, char *name);
 
-void edit_merch_item(ioopm_hash_table_t *merch_ht, char *name, char *new_name, char *new_desc, size_t new_price);
+void edit_merch_item(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, char *name, char *new_name, char *new_desc, size_t new_price);
 
 ioopm_list_t *list_merch(ioopm_hash_table_t *merch_ht);
 
