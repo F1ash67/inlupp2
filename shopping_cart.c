@@ -6,8 +6,6 @@
 #include "backend.h"
 #include <stdlib.h>
 
-//To-Do: Implement checkout(), checks to control that carts exist etc.
-
 size_t cart = 0;
 
 size_t create_cart(ioopm_list_t *carts) {
@@ -64,9 +62,8 @@ void checkout(ioopm_list_t *carts, ioopm_hash_table_t *merch_ht, ioopm_hash_tabl
     while(!ioopm_hash_table_iterator_at_end) {
         char *name = ioopm_hash_table_iterator_current_key(it).s;
         size_t amount = ioopm_hash_table_iterator_current_value(it).i;
-        merch_t *merch = find_merch_item(merch_ht, name);
         
-        //Finish with edit stock function
+        remove_stock(merch_ht, storage_ht, name, amount);
     }
 }
 

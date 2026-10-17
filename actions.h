@@ -1,35 +1,29 @@
 #pragma once
 
-typedef struct cart cart_t;
-
 void add_merch(ioopm_hash_table_t *merch_ht);
 
-void list_merch(ioopm_hash_table_t *merch_ht);
+void list_merch_items(ioopm_hash_table_t *merch_ht);
 
 void remove_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht);
 
-void edit_merch(ioopm_hash_table_t *merch_ht);
+void edit_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht);
 
 void show_stock(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht);
 
 void replenish(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht);
 
-/*
-void create_cart();
+void create_sc(ioopm_list_t *carts);
 
-void remove_cart(cart_t *c);
+void remove_sc(ioopm_list_t *carts);
 
-void add_to_cart(cart_t *c, *db);
+void add_to_sc(ioopm_list_t *carts);
 
-void remove_from_cart(cart_t *c);
+void remove_from_sc(ioopm_list_t *carts);
 
-void calculate_cost(cart_t *c);
+void calculate_sc(ioopm_list_t *carts, ioopm_hash_table_t *merch_ht);
 
-void check_out(cart_t *c);
+void check_out_sc(ioopm_list_t *carts, ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht);
 
-void undo();
+int quit();
 
-void quit();
-
-void save_to_file();
-*/
+int event_loop(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, ioopm_list_t);

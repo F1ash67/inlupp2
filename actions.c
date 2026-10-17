@@ -8,12 +8,12 @@
 #include "actions.h"
 #include "backend.h"
 #include "hash_table_general_key.h"
-#include "hash_table_iterator.h"
+#include "hash_table_iterator_general_key.h"
+#include "linked_list.h"
+#include "linked_list_iterator.h"
 #include "shopping_cart.h"
 
-//To-Do: Shopping cart actions
-
-void print_menu(void)
+static void print_menu(void)
 {
     fprintf(stdout, "[A]: Add merchandise\n" 
                     "[L]: List merchandise\n"
@@ -56,12 +56,30 @@ void add_merch(ioopm_hash_table_t *merch_ht) {
     create_merch_item(merch_ht, name, desc, price);
 }
 
-void list_merch(ioopm_hash_table_t *merch_ht) {
-  //Finish with calling list merch function
+void list_merch_items(ioopm_hash_table_t *merch_ht) {
+    ioopm_list_t *l = list_merch(merch_ht);
+    ioopm_list_iterator_t *it = ioopm_list_iterator_create(l);
+
+    size_t i = 0;
+    while(!ioopm_list_iterator_at_end(it)) {
+        printf("%s\n", ioopm_list_iterator_current(it).s);
+        ioopm_list_iterator_advance(it);
+        i++;
+
+        if(i % 20 == 0 && !ioopm_list_iterator_at_end(it)) {
+            char *confirm  = ask_question_string("Do you want to keep listing merch? If no: (N/n)");
+
+            if(!strcmp(confirm, "N") || !strcmp(confirm, "n")) {
+                break;
+            }
+        }
+    }
+    ioopm_list_iterator_destroy(it);
+    ioopm_list_destroy(l);
 }
 
 void remove_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) {
-    list_merch(merch_ht);
+    list_merch_items(merch_ht);
 
     char* merch = ask_question_string("Enter name of merch to be removed:");
 
@@ -75,8 +93,8 @@ void remove_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) 
     return;
 }
 
-void edit_merch(ioopm_hash_table_t *merch_ht) {
-    list_merch(merch_ht);
+void edit_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) {
+    list_merch_items(merch_ht);
 
     char *old_name = ask_question_string("Enter name of merch to be edited:");
 
@@ -87,7 +105,7 @@ void edit_merch(ioopm_hash_table_t *merch_ht) {
     char *confirm = ask_question_string("Confirm removal (Y/y):");
 
     if(strcmp(confirm, "Y") || strcmp(confirm, "y")) {
-        edit_merch_item(merch_ht, old_name, new_name, new_desc, new_price);
+        edit_merch_item(merch_ht, storage_ht, old_name, new_name, new_desc, new_price);
         return;
     }
     print("Aborting removal\n");
@@ -95,7 +113,7 @@ void edit_merch(ioopm_hash_table_t *merch_ht) {
 }
 
 void show_stock(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) {
-    list_merch(merch_ht);
+    list_merch_items(merch_ht);
 
     char *merch = ask_question_string("Enter name of the merch to show stock for:");
 
@@ -103,7 +121,7 @@ void show_stock(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) {
 }
 
 void replenish(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) {
-    list_merch(merch_ht);
+    list_merch_items(merch_ht);
 
     char *merch = ask_question_string("Enter the name of the merch to replenish:");
     char *location = ask_question_string("Enter the storage location to replenish:");
@@ -174,9 +192,9 @@ int event_loop(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, ioo
 {
   char c = ask_question_menu();
   if(c == 'A') add_merch(merch_ht);
-  else if(c == 'L') list_merch(merch_ht);
+  else if(c == 'L') list_merch_items(merch_ht);
   else if(c == 'D') remove_merch(merch_ht, storage_ht);
-  else if(c == 'E') edit_merch(merch_ht);
+  else if(c == 'E') edit_merch(merch_ht, storage_ht);
   else if(c == 'S') show_stock(merch_ht, storage_ht);
   else if(c == 'P') replenish(merch_ht, storage_ht);
   else if(c == 'C') create_sc(carts);
