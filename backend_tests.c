@@ -141,6 +141,53 @@ void test_remove_stock()
   ioopm_hash_table_destroy(storage_ht);
 }
 
+void test_edit_merch()
+{
+  ioopm_hash_table_t *merch_ht =
+      ioopm_hash_table_create(str_hash, str_eq);
+  ioopm_hash_table_t *storage_ht =
+      ioopm_hash_table_create(str_hash, str_eq);
+
+  create_merch_item(merch_ht, "shirt", "A shirt", 100);
+
+  replenish_merch_item(storage_ht, merch_ht, "shirt", "A23");
+  replenish_merch_item(storage_ht, merch_ht, "shirt", "A23");
+  replenish_merch_item(storage_ht, merch_ht, "shirt", "B54");
+
+  edit_merch_item(
+      merch_ht, storage_ht,
+      "shirt", "hoodie", "A hoodie", 250);
+
+  // The merchandise should be accessible by its new name.
+  elem_t result;
+  CU_ASSERT_TRUE(
+      ioopm_hash_table_lookup(
+          merch_ht, string_elem("hoodie"), &result));
+
+  // The old name should no longer exist.
+  CU_ASSERT_FALSE(
+      ioopm_hash_table_has_key(
+          merch_ht, string_elem("shirt")));
+
+  // The item's details should be updated.
+  merch_t *hoodie = find_merch_item(merch_ht, "hoodie");
+  CU_ASSERT_STRING_EQUAL(get_name(hoodie), "hoodie");
+  CU_ASSERT_EQUAL(get_price(hoodie), 250);
+
+  // Existing stock should be preserved.
+  CU_ASSERT_EQUAL(get_tot_stock(merch_ht, "hoodie"), 3);
+
+  // Existing storage locations should still be occupied.
+  CU_ASSERT_TRUE(
+      ioopm_hash_table_has_key(storage_ht, string_elem("A23")));
+  CU_ASSERT_TRUE(
+      ioopm_hash_table_has_key(storage_ht, string_elem("B54")));
+
+  destroy_all_merch(merch_ht, storage_ht);
+  ioopm_hash_table_destroy(merch_ht);
+  ioopm_hash_table_destroy(storage_ht);
+}
+
 void test_replenish_same_location()
 {
   ioopm_hash_table_t *merch_ht =
@@ -208,6 +255,7 @@ void test_remove_merch_with_stock()
 
   create_merch_item(merch_ht, "shirt", "a shirt", 100);
   create_merch_item(merch_ht, "pants", "a pair of pants", 150);
+
 
   replenish_merch_item(storage_ht, merch_ht, "shirt", "A23");
   replenish_merch_item(storage_ht, merch_ht, "shirt", "B54");
@@ -280,6 +328,7 @@ int main()
       (CU_add_test(backend_test_suite, "Check quantity of merch", test_quantity) == NULL) ||
       (CU_add_test(backend_test_suite, "List all merch", test_merch_list) == NULL) ||
       (CU_add_test(backend_test_suite, "Remove stock", test_remove_stock) == NULL) ||
+      (CU_add_test(backend_test_suite, "Edit merch", test_edit_merch) == NULL) ||
       (CU_add_test(backend_test_suite, "Replenish same shelf", test_replenish_same_location) == NULL) ||
       (CU_add_test(backend_test_suite, "Remove stock across shelves", test_remove_stock_across_shelves) == NULL) ||
       (CU_add_test(backend_test_suite, "Remove merchandise with stock", test_remove_merch_with_stock) == NULL) ||
