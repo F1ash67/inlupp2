@@ -55,7 +55,6 @@ void test_add_item_to_multiple_storage()
   create_merch_item(merch_ht, "shirt", "a shirt", 100);
   create_merch_item(merch_ht, "pants", "a pant", 150);
 
-  
   CU_ASSERT_TRUE(replenish_merch_item(storage_ht, merch_ht, "shirt", "A23"));
   CU_ASSERT_TRUE(replenish_merch_item(storage_ht, merch_ht, "shirt", "B54"));
   CU_ASSERT_TRUE(replenish_merch_item(storage_ht, merch_ht, "shirt", "A23"));
@@ -107,7 +106,7 @@ void test_merch_list()
   replenish_merch_item(storage_ht, merch_ht, "pants", "C89");
 
   ioopm_list_t *merch_list = list_merch(merch_ht);
-  
+
   CU_ASSERT_TRUE(ioopm_list_head(merch_list).p == shirt || ioopm_list_head(merch_list).p == pants);
   CU_ASSERT_TRUE(ioopm_list_last(merch_list).p == shirt || ioopm_list_last(merch_list).p == pants);
   destroy_all_merch(merch_ht, storage_ht);
@@ -136,10 +135,121 @@ void test_remove_stock()
   remove_stock(merch_ht, storage_ht, "pants", 1);
   ioopm_list_t *stock_list = get_stock_list(merch_ht, "pants");
   CU_ASSERT_TRUE(ioopm_list_is_empty(stock_list));
-  
+
   destroy_all_merch(merch_ht, storage_ht);
   ioopm_hash_table_destroy(merch_ht);
   ioopm_hash_table_destroy(storage_ht);
+}
+
+void test_replenish_same_location()
+{
+  ioopm_hash_table_t *merch_ht =
+      ioopm_hash_table_create(str_hash, str_eq);
+  ioopm_hash_table_t *storage_ht =
+      ioopm_hash_table_create(str_hash, str_eq);
+
+  create_merch_item(merch_ht, "shirt", "a shirt", 100);
+
+  CU_ASSERT_TRUE(
+      replenish_merch_item(storage_ht, merch_ht, "shirt", "A23"));
+  CU_ASSERT_TRUE(
+      replenish_merch_item(storage_ht, merch_ht, "shirt", "A23"));
+  CU_ASSERT_TRUE(
+      replenish_merch_item(storage_ht, merch_ht, "shirt", "A23"));
+
+  CU_ASSERT_EQUAL(get_tot_stock(merch_ht, "shirt"), 3);
+  CU_ASSERT_EQUAL(
+      ioopm_list_size(get_stock_list(merch_ht, "shirt")), 1);
+
+  destroy_all_merch(merch_ht, storage_ht);
+  ioopm_hash_table_destroy(merch_ht);
+  ioopm_hash_table_destroy(storage_ht);
+}
+
+void test_remove_stock_across_shelves()
+{
+  ioopm_hash_table_t *merch_ht =
+      ioopm_hash_table_create(str_hash, str_eq);
+  ioopm_hash_table_t *storage_ht =
+      ioopm_hash_table_create(str_hash, str_eq);
+
+  create_merch_item(merch_ht, "shirt", "a shirt", 100);
+
+  replenish_merch_item(storage_ht, merch_ht, "shirt", "A23");
+  replenish_merch_item(storage_ht, merch_ht, "shirt", "A23");
+  replenish_merch_item(storage_ht, merch_ht, "shirt", "B54");
+
+  CU_ASSERT_EQUAL(get_tot_stock(merch_ht, "shirt"), 3);
+
+  // A23 has two units; B54 has one.
+  remove_stock(merch_ht, storage_ht, "shirt", 2);
+
+  CU_ASSERT_EQUAL(get_tot_stock(merch_ht, "shirt"), 1);
+
+  // A23 should now be empty and freed.
+  CU_ASSERT_FALSE(
+      ioopm_hash_table_has_key(storage_ht, string_elem("A23")));
+
+  // B54 should still be occupied.
+  CU_ASSERT_TRUE(
+      ioopm_hash_table_has_key(storage_ht, string_elem("B54")));
+
+  destroy_all_merch(merch_ht, storage_ht);
+  ioopm_hash_table_destroy(merch_ht);
+  ioopm_hash_table_destroy(storage_ht);
+}
+
+void test_remove_merch_with_stock()
+{
+  ioopm_hash_table_t *merch_ht =
+      ioopm_hash_table_create(str_hash, str_eq);
+  ioopm_hash_table_t *storage_ht =
+      ioopm_hash_table_create(str_hash, str_eq);
+
+  create_merch_item(merch_ht, "shirt", "a shirt", 100);
+  create_merch_item(merch_ht, "pants", "a pair of pants", 150);
+
+  replenish_merch_item(storage_ht, merch_ht, "shirt", "A23");
+  replenish_merch_item(storage_ht, merch_ht, "shirt", "B54");
+
+  remove_merch_item(storage_ht, merch_ht, "shirt");
+
+  // Merchandise should no longer exist.
+  CU_ASSERT_FALSE(
+      ioopm_hash_table_has_key(merch_ht, string_elem("shirt")));
+
+  // Its former locations should be available.
+  CU_ASSERT_FALSE(
+      ioopm_hash_table_has_key(storage_ht, string_elem("A23")));
+  CU_ASSERT_FALSE(
+      ioopm_hash_table_has_key(storage_ht, string_elem("B54")));
+
+  // Other merchandise should remain untouched.
+  CU_ASSERT_TRUE(
+      ioopm_hash_table_has_key(merch_ht, string_elem("pants")));
+
+  destroy_all_merch(merch_ht, storage_ht);
+  ioopm_hash_table_destroy(merch_ht);
+  ioopm_hash_table_destroy(storage_ht);
+}
+
+void test_merch_getters()
+{
+  ioopm_hash_table_t *merch_ht =
+      ioopm_hash_table_create(str_hash, str_eq);
+
+  ioopm_hash_table_t *storage_ht =
+      ioopm_hash_table_create(str_hash, str_eq);
+
+  merch_t *shirt =
+      create_merch_item(merch_ht, "shirt", "a shirt", 100);
+
+  CU_ASSERT_STRING_EQUAL(get_name(shirt), "shirt");
+  CU_ASSERT_EQUAL(get_price(shirt), 100);
+
+  remove_merch_item(storage_ht, merch_ht, "shirt");
+  ioopm_hash_table_destroy(storage_ht);
+  ioopm_hash_table_destroy(merch_ht);
 }
 
 int main()
@@ -170,6 +280,10 @@ int main()
       (CU_add_test(backend_test_suite, "Check quantity of merch", test_quantity) == NULL) ||
       (CU_add_test(backend_test_suite, "List all merch", test_merch_list) == NULL) ||
       (CU_add_test(backend_test_suite, "Remove stock", test_remove_stock) == NULL) ||
+      (CU_add_test(backend_test_suite, "Replenish same shelf", test_replenish_same_location) == NULL) ||
+      (CU_add_test(backend_test_suite, "Remove stock across shelves", test_remove_stock_across_shelves) == NULL) ||
+      (CU_add_test(backend_test_suite, "Remove merchandise with stock", test_remove_merch_with_stock) == NULL) ||
+      (CU_add_test(backend_test_suite, "Test merchandise getters", test_merch_getters) == NULL) ||
       0)
   {
     // If adding any of the tests fails, we tear down CUnit and exit
