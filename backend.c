@@ -184,9 +184,9 @@ bool replenish_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *me
   return true;
 }
 
-void remove_stock(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, char *name, size_t amt)
+bool remove_stock(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, char *name, size_t amt)
 {
-  assert(amt <= get_tot_stock(merch_ht, name));
+  if(amt > get_tot_stock(merch_ht, name)) return false;
   ioopm_list_t *stock_list = get_stock_list(merch_ht, name);
   ioopm_list_iterator_t *stock_list_iter = ioopm_list_iterator_create(stock_list);
   for (size_t i = 0; i < amt; i++)
@@ -194,7 +194,7 @@ void remove_stock(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, 
     if (ioopm_list_iterator_at_end(stock_list_iter))
     {
       ioopm_list_iterator_destroy(stock_list_iter);
-      return;
+      return false;
     }
     shelf_t *current = ioopm_list_iterator_current(stock_list_iter).p;
     current->quantity--;
@@ -209,6 +209,7 @@ void remove_stock(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, 
     }
   }
   ioopm_list_iterator_destroy(stock_list_iter);
+  return true;
 }
 
 ioopm_list_t *get_stock_list(ioopm_hash_table_t *merch_ht, char *name)

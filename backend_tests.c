@@ -182,7 +182,7 @@ void test_remove_stock_across_shelves()
   CU_ASSERT_EQUAL(get_tot_stock(merch_ht, "shirt"), 3);
 
   // A23 has two units; B54 has one.
-  remove_stock(merch_ht, storage_ht, "shirt", 2);
+  CU_ASSERT_TRUE(remove_stock(merch_ht, storage_ht, "shirt", 2));
 
   CU_ASSERT_EQUAL(get_tot_stock(merch_ht, "shirt"), 1);
 
