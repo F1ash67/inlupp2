@@ -214,6 +214,14 @@ bool str_eq(elem_t a, elem_t b) {
     return strcmp(a.s, b.s) == 0;
 }
 
+size_t int_hash(elem_t key) {
+    return key.i;
+}
+
+bool int_eq(elem_t a, elem_t b) {
+    return a.i == b.i;
+}
+
 void ioopm_read_file(char *file_src, ioopm_hash_table_t *ht) {
 
     FILE *file = fopen(file_src, "r");

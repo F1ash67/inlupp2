@@ -17,6 +17,7 @@ struct merch{
   char* desc;
   size_t price;
   ioopm_list_t *locs;
+  size_t reserved;
 };
 
 struct shelf{
@@ -59,6 +60,20 @@ static shelf_t *create_shelf(char *location, int quantity)
 
 size_t get_price(merch_t *merch) {
   return merch->price;
+}
+
+size_t get_reserved(merch_t *merch) {
+  return merch->reserved;
+}
+
+void reserve(merch_t *merch, size_t amount) {
+  size_t current = get_reserved(merch);
+  merch->reserved = current + amount;
+}
+
+void unreserve(merch_t *merch, size_t amount) {
+  size_t current = get_reserved(merch);
+  merch->reserved = current - amount;
 }
 
 char *get_name(merch_t *merch)

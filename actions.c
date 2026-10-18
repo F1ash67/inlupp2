@@ -148,20 +148,26 @@ void remove_sc(ioopm_list_t *carts) {
     return;
 }
 
-void add_to_sc(ioopm_list_t *carts) {
+void add_to_sc(ioopm_list_t *carts, ioopm_hash_table_t *merch_ht) {
     size_t id = ask_question_int("Enter the id of the shopping cart to add to:");
     char *merch = ask_question_string("Enter the name of the merch to add to the shopping cart:");
     size_t amount = ask_question_int("Enter the amount of the merch to add to the shopping cart");
 
-    add_to_cart(carts, id, merch, amount);
+    int available = add_to_cart(carts, merch_ht, id, merch, amount);
+    if(available != -1) {
+        printf("Only %n items are available", available);
+    }
 }
 
-void remove_from_sc(ioopm_list_t *carts) {
+void remove_from_sc(ioopm_list_t *carts, ioopm_hash_table_t *merch_ht) {
     size_t id = ask_question_int("Enter the id of the shopping cart to remove from:");
     char *merch = ask_question_string("Enter the name of the merch to remove from the shopping cart:");
     size_t amount = ask_question_int("Enter the amount of the merch to remove from the shopping cart");
 
-    remove_from_cart(carts, id, merch, amount);
+    int available = remove_from_cart(carts, merch_ht, id, merch, amount);
+    if(available != -1) {
+        printf("You only have %n items", available);
+    }
 }
 
 void calculate_sc(ioopm_list_t *carts, ioopm_hash_table_t *merch_ht) {
@@ -199,8 +205,8 @@ int event_loop(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, ioo
   else if(c == 'P') replenish(merch_ht, storage_ht);
   else if(c == 'C') create_sc(carts);
   else if(c == 'R') remove_sc(carts);
-  else if(c == '+') add_to_sc(carts);
-  else if(c == '-') remove_from_sc(carts);
+  else if(c == '+') add_to_sc(carts, merch_ht);
+  else if(c == '-') remove_from_sc(carts, merch_ht);
   else if(c == '=') calculate_sc(carts, merch_ht);
   else if(c == 'O') checkout_sc(carts, merch_ht, storage_ht);
   else if(c == 'Q') quit();

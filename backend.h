@@ -9,6 +9,12 @@ typedef struct shelf shelf_t;
 
 size_t get_price(merch_t *merch);
 
+size_t get_reserved(merch_t *merch);
+
+void reserve(merch_t *merch, size_t amount);
+
+void unreserve(merch_t *merch, size_t amount);
+
 char *get_name(merch_t *merch);
 
 merch_t *find_merch_item(ioopm_hash_table_t *merch_ht, char *name);
