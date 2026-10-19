@@ -63,6 +63,14 @@ static shelf_t *create_shelf(char *location, int quantity)
   return shelf;
 }
 
+char *get_location(shelf_t *shelf) {
+  return shelf->location;
+}
+
+size_t get_quantity(shelf_t *shelf) {
+  return shelf->quantity;
+}
+
 size_t get_price(merch_t *merch)
 {
   return merch->price;

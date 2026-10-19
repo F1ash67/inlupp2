@@ -7,6 +7,10 @@
 typedef struct merch merch_t;
 typedef struct shelf shelf_t;
 
+char *get_location(shelf_t *shelf);
+
+size_t get_quantity(shelf_t *shelf);
+
 /// @brief Get the price of a merch item
 /// @param merch The merch item
 /// @return The price in SEK
