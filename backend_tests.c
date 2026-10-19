@@ -158,16 +158,14 @@ void test_edit_merch()
       merch_ht, storage_ht,
       "shirt", "hoodie", "A hoodie", 250);
 
+
+  CU_ASSERT_TRUE(merch_item_exists(merch_ht, "hoodie"));
+  CU_ASSERT_FALSE(merch_item_exists(merch_ht, "shirt"));
   // The merchandise should be accessible by its new name.
   elem_t result;
   CU_ASSERT_TRUE(
       ioopm_hash_table_lookup(
           merch_ht, string_elem("hoodie"), &result));
-
-  // The old name should no longer exist.
-  CU_ASSERT_FALSE(
-      ioopm_hash_table_has_key(
-          merch_ht, string_elem("shirt")));
 
   // The item's details should be updated.
   merch_t *hoodie = find_merch_item(merch_ht, "hoodie");

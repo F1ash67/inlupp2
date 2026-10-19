@@ -59,6 +59,12 @@ void remove_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *merch
 /// @pre The merch hash table must contain an item with the specified name.
 void edit_merch_item(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, char *name, char *new_name, char *new_desc, size_t new_price);
 
+/// @brief Checks if merch item exists in the hash table
+/// @param merch_ht The hash table that stores the merch items
+/// @param name The name of the merch item
+/// @return True if the merch item exists, else false
+bool merch_item_exists(ioopm_hash_table_t *merch_ht, char *name);
+
 /// @brief Creates a list where every element is a merch item
 /// @param merch_ht The hash table where the merch items are stored
 /// @return A list of all elements in the merch hash table, this list must be destroyed by the user

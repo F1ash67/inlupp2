@@ -166,6 +166,11 @@ void edit_merch_item(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_h
   }
 }
 
+bool merch_item_exists(ioopm_hash_table_t* merch_ht, char *name)
+{
+  return(ioopm_hash_table_has_key(merch_ht, string_elem(name)));
+}
+
 ioopm_list_t *list_merch(ioopm_hash_table_t *merch_ht)
 {
   ioopm_hash_table_iterator_t *merch_it = ioopm_hash_table_iterator_create(merch_ht);
