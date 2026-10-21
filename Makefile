@@ -45,6 +45,9 @@ run: webstore
 run_input: webstore
 	./webstore $(INPUT)
 
+run_any_input: clean webstore
+	./webstore $(FILE)
+
 backend_tests: backend_tests.o $(BACKEND)
 	$(CC) $(FLAGS) $^ -o $@ $(LIBS)
 
