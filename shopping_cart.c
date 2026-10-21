@@ -1,7 +1,5 @@
 #include "hash_table_general_key.h"
 #include "hash_table_iterator_general_key.h"
-#include "linked_list.h"
-#include "linked_list_iterator.h"
 #include "shopping_cart.h"
 #include "backend.h"
 #include <stdlib.h>
@@ -38,6 +36,16 @@ size_t create_cart(ioopm_hash_table_t *carts, cart_count_t *count) {
     size_t id = count->id;
     count->id = id + 1;
     return id;
+}
+
+void destroy_carts(ioopm_hash_table_t *carts, ioopm_hash_table_t *merch_ht) {
+    while(!ioopm_hash_table_is_empty(carts)) {
+        ioopm_hash_table_iterator_t *it = ioopm_hash_table_iterator_create(carts);
+        size_t id = ioopm_hash_table_iterator_current_key(it).i;
+        ioopm_hash_table_iterator_destroy(it);
+        remove_cart(carts, merch_ht, id);
+    }
+    ioopm_hash_table_destroy(carts);
 }
 
 bool remove_cart(ioopm_hash_table_t *carts, ioopm_hash_table_t *merch_ht, size_t id) {

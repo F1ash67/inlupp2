@@ -70,3 +70,7 @@ void ioopm_sort_by_frequency(ioopm_hash_table_t *ht);
 size_t str_hash(elem_t key);
 
 bool str_eq(elem_t a, elem_t b);
+
+size_t int_hash(elem_t key);
+
+bool int_eq(elem_t a, elem_t b);

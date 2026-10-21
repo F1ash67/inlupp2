@@ -41,7 +41,9 @@ static bool ask_confirm(char *question)
 char ask_question_menu(void)
 {
     print_menu();
-    char c = toupper(getchar());
+    int ch = getchar();
+    if(ch == EOF) return 'X';
+    char c = toupper(ch);
     clear_input_buffer();
     while(c != 'A' && c != 'L' && c != 'D' && c != 'E' && c != 'S' && c != 'P' && 
           c != 'C' && c != 'R' && c != '+' && c != '-' && c != '=' && c != 'O' && c != 'Q') {
@@ -314,5 +316,6 @@ int event_loop(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, ioo
   else if(c == '=') calculate_sc(carts, merch_ht);
   else if(c == 'O') checkout_sc(carts, merch_ht, storage_ht);
   else if(c == 'Q') return quit();
+  else if (c == 'X') return -1;
   return 0;
 }

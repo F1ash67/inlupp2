@@ -12,6 +12,8 @@ void destroy_cart_count(cart_count_t *count);
 
 size_t create_cart(ioopm_hash_table_t *carts, cart_count_t *count);
 
+void destroy_carts(ioopm_hash_table_t *carts, ioopm_hash_table_t * merch_ht);
+
 bool remove_cart(ioopm_hash_table_t *carts, ioopm_hash_table_t *merch_ht, size_t id);
 
 int add_to_cart(ioopm_hash_table_t *carts, ioopm_hash_table_t *merch_ht, size_t id, char *merch, size_t amount);
