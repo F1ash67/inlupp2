@@ -164,6 +164,7 @@ void edit_merch_item(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_h
     ioopm_hash_table_insert(storage_ht, string_elem(current->location), string_elem(new_name));
     ioopm_list_iterator_advance(stock_list_iter);
   }
+  ioopm_list_iterator_destroy(stock_list_iter);
 }
 
 bool merch_item_exists(ioopm_hash_table_t* merch_ht, char *name)
