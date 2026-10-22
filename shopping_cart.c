@@ -91,8 +91,8 @@ int add_to_cart(ioopm_hash_table_t *carts, ioopm_hash_table_t *merch_ht, size_t 
     
     if(available >= amount) {
         elem_t current = int_elem(0);
-        ioopm_hash_table_lookup(sc, string_elem(name), &current);
-        ioopm_hash_table_insert(sc, string_elem(name), int_elem(amount + current.i));
+        ioopm_hash_table_lookup(sc, string_elem(get_name(merch)), &current);
+        ioopm_hash_table_insert(sc, string_elem(get_name(merch)), int_elem(amount + current.i));
         reserve(merch, amount);
         return -4;
     }

@@ -16,11 +16,6 @@
 
 //Generated using AI
 
-// Defined in hash_table_general_key.c. Delete these two lines once they are
-// declared in hash_table_general_key.h.
-size_t int_hash(elem_t key);
-bool int_eq(elem_t a, elem_t b);
-
 /* =====================================================================
  * Fake keyboard and captured screen
  *
@@ -83,15 +78,13 @@ typedef struct {
     cart_count_t *count;
 } store_t;
 
-// The actions take ownership of strings, like the real program does, so
-// everything stored in the backend is heap-allocated.
+// The backend keeps its own copies of every string, so plain literals
+// are fine here.
 static void add_item(store_t *s, char *name, size_t price, size_t stock, char *location)
 {
-    char *n = strdup(name);
-    create_merch_item(s->merch_ht, n, strdup("test description"), price);
-    char *loc = strdup(location);
+    create_merch_item(s->merch_ht, name, "test description", price);
     for (size_t i = 0; i < stock; i++) {
-        replenish_merch_item(s->storage_ht, s->merch_ht, n, loc);
+        replenish_merch_item(s->storage_ht, s->merch_ht, name, location);
     }
 }
 
@@ -118,7 +111,7 @@ static void teardown(store_t *s)
     ioopm_hash_table_iterator_destroy(it);
     ioopm_hash_table_destroy(s->carts);
     destroy_cart_count(s->count);
-    destroy_all_merch(s->merch_ht, s->storage_ht);
+    destroy_all_merch(s->merch_ht, s->storage_ht);   // also destroys both tables
 }
 
 static bool has_merch(store_t *s, char *name)

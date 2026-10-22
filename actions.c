@@ -251,19 +251,25 @@ void add_to_sc(ioopm_hash_table_t *carts, ioopm_hash_table_t *merch_ht) {
     if(available == -1) {
         printf("Invalid id\n");
         free(merch);
+        return;
     }
     else if(available == -2) {
         printf("Invalid merch\n");
         free(merch);
+        return;
     }
     else if(available == -3) {
         printf("Invalid amount\n");
         free(merch);
+        return;
     }
     else if(available != -4) {
         printf("Only %d available\n", available);
         free(merch);
+        return;
     }
+    free(merch);
+
 }
 
 void remove_from_sc(ioopm_hash_table_t *carts, ioopm_hash_table_t *merch_ht) {
