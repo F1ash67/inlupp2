@@ -4,11 +4,24 @@
 #include "hash_table_general_key.h"
 #include "linked_list.h"
 
+/// @brief A struct to store a merch item, stores details like name, description,
+/// price, a list of storage locations saved as shelves as well as the amount
+/// of currently reserved items
 typedef struct merch merch_t;
+
+/// @brief A struct to store a shelf, the shelf stores the location in the 
+/// warehouse, given as a code with one letter and two numbers, as well as the 
+/// amount of items
 typedef struct shelf shelf_t;
 
+/// @brief Get the location of a given shelf
+/// @param shelf The shelf to find the location of
+/// @return The location as a string
 char *get_location(shelf_t *shelf);
 
+/// @brief Get the quantity of items of a given shelf
+/// @param shelf The shelf to get the quantity of
+/// @return The quantity of items
 size_t get_quantity(shelf_t *shelf);
 
 /// @brief Get the price of a merch item
@@ -16,10 +29,20 @@ size_t get_quantity(shelf_t *shelf);
 /// @return The price in SEK
 size_t get_price(merch_t *merch);
 
+/// @brief Get the amount of reserved items of a given merch item
+/// @param merch The merch item
+/// @return The amount of reserved items
 size_t get_reserved(merch_t *merch);
 
+/// @brief Reserve a given amount of a given merch to avoid multiple people 
+/// buying from the same stock
+/// @param merch The merch to reserve from, this merch item will be changed
+/// @param amount The amount to be reserved
 void reserve(merch_t *merch, size_t amount);
 
+/// @brief Unreserve a given amount of a given merch item that wasn't sold
+/// @param merch The merch item to unreserve from, this merch item will be changed
+/// @param amount The amount to unreserve
 void unreserve(merch_t *merch, size_t amount);
 
 /// @brief Get the name of a merch item
