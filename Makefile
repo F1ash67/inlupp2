@@ -75,4 +75,4 @@ cov: clean
 clean:
 	rm -f webstore $(TESTS) *.o *.gcda *.gcno *.gcov
 
-.PHONY: complete run run_input test valgrind cov clean
+.PHONY: all run run_input run_any_input test valgrind cov clean
