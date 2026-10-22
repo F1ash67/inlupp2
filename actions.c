@@ -218,6 +218,8 @@ void replenish(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) {
     for(int i = 1; i < amount; i++) {
         replenish_merch_item(storage_ht, merch_ht, merch, location);
     }
+    free(merch);
+    free(location);
 }
 
 void create_sc(ioopm_hash_table_t *carts, cart_count_t *count) {

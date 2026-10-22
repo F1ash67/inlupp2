@@ -12,7 +12,7 @@ CART_H    = shopping_cart.h $(HT_H) $(LIST_H)
 ACTIONS_H = actions.h $(HT_H) $(CART_H)
 UTILS_H   = utils.h
 
-complete: webstore
+all: webstore
 
 %.o: %.c
 	$(CC) $(FLAGS) -c $< -o $@

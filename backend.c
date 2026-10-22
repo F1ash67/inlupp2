@@ -208,8 +208,8 @@ bool replenish_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *me
     return false;
 
   shelf_t *new_shelf = create_shelf(strdup(location), 1);
-
-  ioopm_hash_table_insert(storage_ht, string_elem(new_shelf->location), string_elem(name));
+  merch_t *merch = find_merch_item(merch_ht, name);
+  ioopm_hash_table_insert(storage_ht, string_elem(new_shelf->location), string_elem(get_name(merch)));
   ioopm_list_append(stock_list, ptr_elem(new_shelf));
   return true;
 }
