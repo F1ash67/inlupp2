@@ -106,14 +106,15 @@ merch_t *find_merch_item(ioopm_hash_table_t *merch_ht, char *name)
 
 static void destroy_shelf(shelf_t *shelf)
 {
+  free(shelf->location);
   free(shelf);
 }
 
 merch_t *create_merch_item(ioopm_hash_table_t *merch_ht, char *name, char *desc, size_t price)
 {
   merch_t *merch = calloc(1, sizeof(merch_t));
-  merch->name = name;
-  merch->desc = desc;
+  merch->name = strdup(name);
+  merch->desc = strdup(desc);
   merch->price = price;
   merch->locs = ioopm_list_create();
 
@@ -137,6 +138,8 @@ void remove_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *merch
 
   ioopm_list_destroy(list);
   ioopm_hash_table_remove(merch_ht, string_elem(name), &result);
+  free(merch->name);
+  free(merch->desc);
   free(merch);
 }
 
@@ -147,21 +150,19 @@ void edit_merch_item(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_h
 
   elem_t result;
   assert(ioopm_hash_table_remove(merch_ht, string_elem(name), &result));
-
-  merch->name = new_name;
-  merch->desc = new_desc;
+  free(merch->name);
+  free(merch->desc);
+  merch->name = strdup(new_name);
+  merch->desc = strdup(new_desc);
   merch->price = new_price;
 
-  ioopm_hash_table_insert(
-      merch_ht,
-      string_elem(new_name),
-      ptr_elem(merch));
+  ioopm_hash_table_insert(merch_ht, string_elem(merch->name), ptr_elem(merch));
 
   ioopm_list_iterator_t *stock_list_iter = ioopm_list_iterator_create(stock_list);
   while (!ioopm_list_iterator_at_end(stock_list_iter))
   {
     shelf_t *current = ioopm_list_iterator_current(stock_list_iter).p;
-    ioopm_hash_table_insert(storage_ht, string_elem(current->location), string_elem(new_name));
+    ioopm_hash_table_insert(storage_ht, string_elem(current->location), string_elem(merch->name));
     ioopm_list_iterator_advance(stock_list_iter);
   }
   ioopm_list_iterator_destroy(stock_list_iter);
@@ -206,9 +207,9 @@ bool replenish_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *me
   if (!location_empty(storage_ht, location) || !is_storage_nmr(location))
     return false;
 
-  shelf_t *new_shelf = create_shelf(location, 1);
+  shelf_t *new_shelf = create_shelf(strdup(location), 1);
 
-  ioopm_hash_table_insert(storage_ht, string_elem(location), string_elem(name));
+  ioopm_hash_table_insert(storage_ht, string_elem(new_shelf->location), string_elem(name));
   ioopm_list_append(stock_list, ptr_elem(new_shelf));
   return true;
 }
@@ -272,4 +273,6 @@ void destroy_all_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage
 
     remove_merch_item(storage_ht, merch_ht, name);
   }
+  ioopm_hash_table_destroy(merch_ht);
+  ioopm_hash_table_destroy(storage_ht);
 }

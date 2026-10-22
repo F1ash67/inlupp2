@@ -119,8 +119,6 @@ static void teardown(store_t *s)
     ioopm_hash_table_destroy(s->carts);
     destroy_cart_count(s->count);
     destroy_all_merch(s->merch_ht, s->storage_ht);
-    ioopm_hash_table_destroy(s->merch_ht);
-    ioopm_hash_table_destroy(s->storage_ht);
 }
 
 static bool has_merch(store_t *s, char *name)
@@ -319,10 +317,10 @@ static void test_show_stock(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("apple\n", show_stock(s.merch_ht, s.storage_ht));
+    WITH_INPUT("apple\n", show_stock(s.merch_ht));
     CU_ASSERT_TRUE(printed("A01: 5"));
 
-    WITH_INPUT("pear\n", show_stock(s.merch_ht, s.storage_ht));
+    WITH_INPUT("pear\n", show_stock(s.merch_ht));
     CU_ASSERT_TRUE(printed("Invalid merch"));
 
     teardown(&s);

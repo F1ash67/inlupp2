@@ -34,8 +34,6 @@ static void add_test_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *sto
 static void destroy_backend(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht)
 {
     destroy_all_merch(merch_ht, storage_ht);
-    ioopm_hash_table_destroy(merch_ht);
-    ioopm_hash_table_destroy(storage_ht);
 }
 
 /* ===================================================================== */

@@ -13,7 +13,7 @@ void remove_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht);
 
 void edit_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht);
 
-void show_stock(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht);
+void show_stock(ioopm_hash_table_t *merch_ht);
 
 void replenish(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht);
 

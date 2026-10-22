@@ -71,6 +71,8 @@ void add_merch(ioopm_hash_table_t *merch_ht) {
     }
 
     create_merch_item(merch_ht, name, desc, price);
+    free(name);
+    free(desc);
 }
 
 void list_merch_items(ioopm_hash_table_t *merch_ht) {
@@ -100,7 +102,7 @@ void remove_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) 
 
     char* merch = ask_question_string("Enter name of merch to be removed:");
 
-    if(!ioopm_hash_table_has_key(merch_ht, string_elem(merch))) {
+    if(!merch_item_exists(merch_ht, merch)) {
         printf("Invalid merch\n");
         free(merch);
         return;
@@ -126,7 +128,7 @@ void edit_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) {
 
     char *old_name = ask_question_string("Enter name of merch to be edited:");
 
-    if(!ioopm_hash_table_has_key(merch_ht, string_elem(old_name))) {
+    if(!merch_item_exists(merch_ht, old_name)) {
         printf("Invalid merch\n");
         free(old_name);
         return;
@@ -152,6 +154,8 @@ void edit_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) {
     if(ask_confirm("Confirm edit (Y/y):")) {
         edit_merch_item(merch_ht, storage_ht, old_name, new_name, new_desc, new_price);
         free(old_name);
+        free(new_name);
+        free(new_desc);
         return;
     }
     print("Aborting edit\n");
@@ -161,12 +165,12 @@ void edit_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) {
     return;
 }
 
-void show_stock(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) {
+void show_stock(ioopm_hash_table_t *merch_ht) {
     list_merch_items(merch_ht);
 
     char *merch = ask_question_string("Enter name of the merch to show stock for:");
 
-    if(!ioopm_hash_table_has_key(merch_ht, string_elem(merch))) {
+    if(!merch_item_exists(merch_ht, merch)) {
         printf("Invalid merch\n");
         free(merch);
         return;
@@ -307,7 +311,7 @@ int event_loop(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, ioo
   else if(c == 'L') list_merch_items(merch_ht);
   else if(c == 'D') remove_merch(merch_ht, storage_ht);
   else if(c == 'E') edit_merch(merch_ht, storage_ht);
-  else if(c == 'S') show_stock(merch_ht, storage_ht);
+  else if(c == 'S') show_stock(merch_ht);
   else if(c == 'P') replenish(merch_ht, storage_ht);
   else if(c == 'C') create_sc(carts, count);
   else if(c == 'R') remove_sc(carts, merch_ht);

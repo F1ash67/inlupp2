@@ -22,8 +22,6 @@ int main(int argc, char *argv[]) {
 
     destroy_carts(cart_ht, merch_ht);
     destroy_all_merch(merch_ht, storage_ht);
-    ioopm_hash_table_destroy(merch_ht);
-    ioopm_hash_table_destroy(storage_ht);
     destroy_cart_count(count);
     return 0;
 }

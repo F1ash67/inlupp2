@@ -24,9 +24,7 @@ void test_create_destroy()
   elem_t result;
   CU_ASSERT_TRUE(ioopm_hash_table_lookup(merch_ht, string_elem("shirt"), &result));
 
-  remove_merch_item(storage_ht, merch_ht, "shirt");
-  ioopm_hash_table_destroy(storage_ht);
-  ioopm_hash_table_destroy(merch_ht);
+  destroy_all_merch(merch_ht, storage_ht);
 }
 
 void test_add_item_to_storage()
@@ -43,9 +41,6 @@ void test_add_item_to_storage()
   CU_ASSERT_FALSE(replenish_merch_item(storage_ht, merch_ht, "pants", "A23"));
 
   destroy_all_merch(merch_ht, storage_ht);
-
-  ioopm_hash_table_destroy(merch_ht);
-  ioopm_hash_table_destroy(storage_ht);
 }
 
 void test_add_item_to_multiple_storage()
@@ -64,9 +59,6 @@ void test_add_item_to_multiple_storage()
   CU_ASSERT_TRUE(ioopm_hash_table_lookup(merch_ht, string_elem("shirt"), &result));
 
   destroy_all_merch(merch_ht, storage_ht);
-
-  ioopm_hash_table_destroy(merch_ht);
-  ioopm_hash_table_destroy(storage_ht);
 }
 
 void test_quantity()
@@ -88,9 +80,6 @@ void test_quantity()
   CU_ASSERT_EQUAL(quantity_pants, 1);
 
   destroy_all_merch(merch_ht, storage_ht);
-
-  ioopm_hash_table_destroy(merch_ht);
-  ioopm_hash_table_destroy(storage_ht);
 }
 
 void test_merch_list()
@@ -112,8 +101,6 @@ void test_merch_list()
   destroy_all_merch(merch_ht, storage_ht);
 
   ioopm_list_destroy(merch_list);
-  ioopm_hash_table_destroy(merch_ht);
-  ioopm_hash_table_destroy(storage_ht);
 }
 
 void test_remove_stock()
@@ -137,8 +124,6 @@ void test_remove_stock()
   CU_ASSERT_TRUE(ioopm_list_is_empty(stock_list));
 
   destroy_all_merch(merch_ht, storage_ht);
-  ioopm_hash_table_destroy(merch_ht);
-  ioopm_hash_table_destroy(storage_ht);
 }
 
 void test_edit_merch()
@@ -182,8 +167,6 @@ void test_edit_merch()
       ioopm_hash_table_has_key(storage_ht, string_elem("B54")));
 
   destroy_all_merch(merch_ht, storage_ht);
-  ioopm_hash_table_destroy(merch_ht);
-  ioopm_hash_table_destroy(storage_ht);
 }
 
 void test_replenish_same_location()
@@ -207,8 +190,6 @@ void test_replenish_same_location()
       ioopm_list_size(get_stock_list(merch_ht, "shirt")), 1);
 
   destroy_all_merch(merch_ht, storage_ht);
-  ioopm_hash_table_destroy(merch_ht);
-  ioopm_hash_table_destroy(storage_ht);
 }
 
 void test_remove_stock_across_shelves()
@@ -240,8 +221,6 @@ void test_remove_stock_across_shelves()
       ioopm_hash_table_has_key(storage_ht, string_elem("B54")));
 
   destroy_all_merch(merch_ht, storage_ht);
-  ioopm_hash_table_destroy(merch_ht);
-  ioopm_hash_table_destroy(storage_ht);
 }
 
 void test_remove_merch_with_stock()
@@ -275,8 +254,6 @@ void test_remove_merch_with_stock()
       ioopm_hash_table_has_key(merch_ht, string_elem("pants")));
 
   destroy_all_merch(merch_ht, storage_ht);
-  ioopm_hash_table_destroy(merch_ht);
-  ioopm_hash_table_destroy(storage_ht);
 }
 
 void test_merch_getters()
@@ -293,9 +270,8 @@ void test_merch_getters()
   CU_ASSERT_STRING_EQUAL(get_name(shirt), "shirt");
   CU_ASSERT_EQUAL(get_price(shirt), 100);
 
-  remove_merch_item(storage_ht, merch_ht, "shirt");
-  ioopm_hash_table_destroy(storage_ht);
-  ioopm_hash_table_destroy(merch_ht);
+  destroy_all_merch(merch_ht, storage_ht);
+
 }
 
 int main()
