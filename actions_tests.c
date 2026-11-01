@@ -325,7 +325,7 @@ static void test_replenish_existing_shelf(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("apple\nA01\n3\n", replenish(s.merch_ht, s.storage_ht));
+    WITH_INPUT("A01\napple\n3\n", replenish(s.merch_ht, s.storage_ht));
 
     CU_ASSERT_EQUAL(get_tot_stock(s.merch_ht, "apple"), 8);
 
@@ -336,7 +336,7 @@ static void test_replenish_new_shelf(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("apple\nA02\n4\n", replenish(s.merch_ht, s.storage_ht));
+    WITH_INPUT("A02\napple\n4\n", replenish(s.merch_ht, s.storage_ht));
 
     CU_ASSERT_EQUAL(get_tot_stock(s.merch_ht, "apple"), 9);
     CU_ASSERT_TRUE(ioopm_hash_table_has_key(s.storage_ht, string_elem("A02")));
@@ -348,20 +348,20 @@ static void test_replenish_invalid_input(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("pear\n", replenish(s.merch_ht, s.storage_ht));
+    WITH_INPUT("A01\npear\n2\n", replenish(s.merch_ht, s.storage_ht));
     CU_ASSERT_TRUE(printed("Invalid merch"));
 
-    WITH_INPUT("apple\nA01\n0\n", replenish(s.merch_ht, s.storage_ht));
+    WITH_INPUT("A01\napple\n0\n", replenish(s.merch_ht, s.storage_ht));
     CU_ASSERT_TRUE(printed("Invalid amount"));
 
-    WITH_INPUT("apple\nA01\n-3\n", replenish(s.merch_ht, s.storage_ht));
+    WITH_INPUT("A01\napple\n-3\n", replenish(s.merch_ht, s.storage_ht));
     CU_ASSERT_TRUE(printed("Invalid amount"));
 
     // B01 belongs to banana
-    WITH_INPUT("apple\nB01\n2\n", replenish(s.merch_ht, s.storage_ht));
+    WITH_INPUT("B01\napple\n2\n", replenish(s.merch_ht, s.storage_ht));
     CU_ASSERT_TRUE(printed("Invalid location"));
 
-    WITH_INPUT("apple\nXYZ\n2\n", replenish(s.merch_ht, s.storage_ht));
+    WITH_INPUT("XYZ\napple\n2\n", replenish(s.merch_ht, s.storage_ht));
     CU_ASSERT_TRUE(printed("Invalid location"));
 
     // None of these changed the stock
@@ -378,10 +378,10 @@ static void test_create_sc(void)
     store_t s = setup();
 
     WITH_INPUT("", create_sc(s.carts, s.count));
-    CU_ASSERT_TRUE(printed("Created shopping cart 0"));
+    CU_ASSERT_TRUE(printed("Created shopping cart 1"));
 
     WITH_INPUT("", create_sc(s.carts, s.count));
-    CU_ASSERT_TRUE(printed("Created shopping cart 1"));
+    CU_ASSERT_TRUE(printed("Created shopping cart 2"));
 
     CU_ASSERT_EQUAL(ioopm_hash_table_size(s.carts), 2);
 
@@ -394,15 +394,15 @@ static void test_remove_sc(void)
     size_t id = create_cart(s.carts, s.count);
     add_to_cart(s.carts, s.merch_ht, id, "apple", 2);
 
-    WITH_INPUT("0\nn\n", remove_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\nn\n", remove_sc(s.carts, s.merch_ht));
     CU_ASSERT_TRUE(printed("Aborting removal"));
     CU_ASSERT_EQUAL(ioopm_hash_table_size(s.carts), 1);
 
-    WITH_INPUT("0\ny\n", remove_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\ny\n", remove_sc(s.carts, s.merch_ht));
     CU_ASSERT_EQUAL(ioopm_hash_table_size(s.carts), 0);
     CU_ASSERT_EQUAL(reserved_of(&s, "apple"), 0);
 
-    WITH_INPUT("0\ny\n", remove_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\ny\n", remove_sc(s.carts, s.merch_ht));
     CU_ASSERT_TRUE(printed("Invalid id"));
 
     teardown(&s);
@@ -415,10 +415,10 @@ static void test_add_to_sc(void)
     store_t s = setup();
     create_cart(s.carts, s.count);
 
-    WITH_INPUT("0\napple\n3\n", add_to_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\napple\n3\n", add_to_sc(s.carts, s.merch_ht));
 
     CU_ASSERT_EQUAL(reserved_of(&s, "apple"), 3);
-    CU_ASSERT_EQUAL(calculate_cost(s.carts, s.merch_ht, 0), 30);
+    CU_ASSERT_EQUAL(calculate_cost(s.carts, s.merch_ht, 1), 30);
 
     teardown(&s);
 }
@@ -431,14 +431,14 @@ static void test_add_to_sc_invalid_input(void)
     WITH_INPUT("7\napple\n1\n", add_to_sc(s.carts, s.merch_ht));
     CU_ASSERT_TRUE(printed("Invalid id"));
 
-    WITH_INPUT("0\napple\n0\n", add_to_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\napple\n0\n", add_to_sc(s.carts, s.merch_ht));
     CU_ASSERT_TRUE(printed("Invalid amount"));
 
-    WITH_INPUT("0\napple\n6\n", add_to_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\napple\n6\n", add_to_sc(s.carts, s.merch_ht));
     CU_ASSERT_TRUE(printed("Only 5 available"));
 
     CU_ASSERT_EQUAL(reserved_of(&s, "apple"), 0);
-    CU_ASSERT_EQUAL(calculate_cost(s.carts, s.merch_ht, 0), 0);
+    CU_ASSERT_EQUAL(calculate_cost(s.carts, s.merch_ht, 1), 0);
 
     teardown(&s);
 }
@@ -449,11 +449,11 @@ static void test_remove_from_sc(void)
     size_t id = create_cart(s.carts, s.count);
     add_to_cart(s.carts, s.merch_ht, id, "apple", 3);
 
-    WITH_INPUT("0\napple\n2\n", remove_from_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\napple\n2\n", remove_from_sc(s.carts, s.merch_ht));
     CU_ASSERT_EQUAL(reserved_of(&s, "apple"), 1);
-    CU_ASSERT_EQUAL(calculate_cost(s.carts, s.merch_ht, 0), 10);
+    CU_ASSERT_EQUAL(calculate_cost(s.carts, s.merch_ht, 1), 10);
 
-    WITH_INPUT("0\napple\n5\n", remove_from_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\napple\n5\n", remove_from_sc(s.carts, s.merch_ht));
     CU_ASSERT_TRUE(printed("You only have 1 items"));
 
     WITH_INPUT("7\napple\n1\n", remove_from_sc(s.carts, s.merch_ht));
@@ -473,7 +473,7 @@ static void test_calculate_sc(void)
     add_to_cart(s.carts, s.merch_ht, id, "apple", 2);
     add_to_cart(s.carts, s.merch_ht, id, "banana", 1);
 
-    WITH_INPUT("0\n", calculate_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\n", calculate_sc(s.carts, s.merch_ht));
     CU_ASSERT_TRUE(printed("Your items cost 23kr"));
 
     WITH_INPUT("7\n", calculate_sc(s.carts, s.merch_ht));
@@ -489,12 +489,12 @@ static void test_checkout_sc(void)
     size_t id = create_cart(s.carts, s.count);
     add_to_cart(s.carts, s.merch_ht, id, "apple", 2);
 
-    WITH_INPUT("0\n", checkout_sc(s.carts, s.merch_ht, s.storage_ht));
+    WITH_INPUT("1\n", checkout_sc(s.carts, s.merch_ht, s.storage_ht));
     CU_ASSERT_EQUAL(get_tot_stock(s.merch_ht, "apple"), 3);
     CU_ASSERT_EQUAL(reserved_of(&s, "apple"), 0);
     CU_ASSERT_EQUAL(ioopm_hash_table_size(s.carts), 0);
 
-    WITH_INPUT("0\n", checkout_sc(s.carts, s.merch_ht, s.storage_ht));
+    WITH_INPUT("1\n", checkout_sc(s.carts, s.merch_ht, s.storage_ht));
     CU_ASSERT_TRUE(printed("Invalid id"));
 
     teardown(&s);
@@ -525,7 +525,7 @@ static void test_event_loop(void)
     CU_ASSERT_EQUAL(ioopm_hash_table_size(s.carts), 1);
 
     // An invalid choice shows the menu again until a valid one is given
-    WITH_INPUT("x\n+\n0\nbanana\n1\n", result = event_loop(s.merch_ht, s.storage_ht, s.carts, s.count));
+    WITH_INPUT("x\n+\n1\nbanana\n1\n", result = event_loop(s.merch_ht, s.storage_ht, s.carts, s.count));
     CU_ASSERT_TRUE(printed("Please enter a valid option"));
     CU_ASSERT_EQUAL(reserved_of(&s, "banana"), 1);
 

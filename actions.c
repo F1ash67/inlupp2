@@ -196,24 +196,16 @@ void replenish(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) {
     list_merch_items(merch_ht);
 
     char *location = ask_question_string("Enter the storage location to replenish:");
-    
     char *merch = ask_question_string("Enter the name of the merch to replenish:");
+    int amount = ask_question_int("Enter the amount to replenish:");
 
     if(!ioopm_hash_table_has_key(merch_ht, string_elem(merch))) {
         printf("Invalid merch\n");
         free(merch);
+        free(location);
         return;
     }
 
-    if(!replenish_merch_item(storage_ht, merch_ht, merch, location)) {
-    printf("Invalid location\n");
-    free(merch);
-    free(location);
-    return;
-    }
-
-    int amount = ask_question_int("Enter the amount to replenish:");
-    
     if(amount <= 0) {
         printf("Invalid amount\n");
         free(merch);
@@ -221,6 +213,13 @@ void replenish(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) {
         return;
     }
 
+    if(!replenish_merch_item(storage_ht, merch_ht, merch, location)) {
+        printf("Invalid location\n");
+        free(merch);
+        free(location);
+        return;
+    }
+    
     for(int i = 1; i < amount; i++) {
         replenish_merch_item(storage_ht, merch_ht, merch, location);
     }

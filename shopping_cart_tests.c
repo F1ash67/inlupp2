@@ -99,9 +99,10 @@ static void test_create_cart_gives_increasing_ids(void)
 {
     fixture_t f = setup();
 
-    CU_ASSERT_EQUAL(create_cart(f.carts, f.count), 0);
+    // Ids start at 1
     CU_ASSERT_EQUAL(create_cart(f.carts, f.count), 1);
     CU_ASSERT_EQUAL(create_cart(f.carts, f.count), 2);
+    CU_ASSERT_EQUAL(create_cart(f.carts, f.count), 3);
 
     teardown(&f);
 }
@@ -308,8 +309,8 @@ static void test_remove_cart_keeps_other_carts(void)
     CU_ASSERT_EQUAL(calculate_cost(f.carts, f.merch_ht, b), 20);
     CU_ASSERT_EQUAL(add_to_cart(f.carts, f.merch_ht, b, "apple", 1), SUCCESS);
 
-    // New carts don't reuse old ids
-    CU_ASSERT_EQUAL(create_cart(f.carts, f.count), 2);
+    // New carts don't reuse old ids (carts 1 and 2 existed)
+    CU_ASSERT_EQUAL(create_cart(f.carts, f.count), 3);
 
     teardown(&f);
 }
