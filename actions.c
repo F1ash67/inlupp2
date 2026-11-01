@@ -27,7 +27,7 @@ static void print_menu(void)
                     "[-]: Remove from cart\n"
                     "[=]: Calculate cost\n"
                     "[O]: Checkout\n"
-                    "[Q]: Quit\n");
+                    "[Q]: Quit\n\n");
 }
 
 static bool ask_confirm(char *question)
@@ -38,7 +38,7 @@ static bool ask_confirm(char *question)
     return yes;
 }
 
-char ask_question_menu(void)
+static char ask_question_menu(void)
 {
     print_menu();
     int ch = getchar();
@@ -93,6 +93,7 @@ void list_merch_items(ioopm_hash_table_t *merch_ht) {
             if(stop) break;
         }
     }
+    printf("\n");
     ioopm_list_iterator_destroy(it);
     ioopm_list_destroy(l);
 }
@@ -186,6 +187,7 @@ void show_stock(ioopm_hash_table_t *merch_ht) {
         printf("%s: %zu\n", location, quantity);
         ioopm_list_iterator_advance(it);
     }
+    printf("\n");
     ioopm_list_iterator_destroy(it);
     free(merch);
 }
@@ -193,6 +195,8 @@ void show_stock(ioopm_hash_table_t *merch_ht) {
 void replenish(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) {
     list_merch_items(merch_ht);
 
+    char *location = ask_question_string("Enter the storage location to replenish:");
+    
     char *merch = ask_question_string("Enter the name of the merch to replenish:");
 
     if(!ioopm_hash_table_has_key(merch_ht, string_elem(merch))) {
@@ -200,21 +204,23 @@ void replenish(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) {
         free(merch);
         return;
     }
-    char *location = ask_question_string("Enter the storage location to replenish:");
-    int amount = ask_question_int("Enter the amount to replenish:");
 
+    if(!replenish_merch_item(storage_ht, merch_ht, merch, location)) {
+    printf("Invalid location\n");
+    free(merch);
+    free(location);
+    return;
+    }
+
+    int amount = ask_question_int("Enter the amount to replenish:");
+    
     if(amount <= 0) {
         printf("Invalid amount\n");
         free(merch);
         free(location);
         return;
     }
-    if(!replenish_merch_item(storage_ht, merch_ht, merch, location)) {
-        printf("Invalid location\n");
-        free(merch);
-        free(location);
-        return;
-    }
+
     for(int i = 1; i < amount; i++) {
         replenish_merch_item(storage_ht, merch_ht, merch, location);
     }
@@ -224,7 +230,7 @@ void replenish(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht) {
 
 void create_sc(ioopm_hash_table_t *carts, cart_count_t *count) {
     size_t id = create_cart(carts, count);
-    printf("Created shopping cart %zu\n", id);
+    printf("\nCreated shopping cart %zu\n\n", id);
 }
 
 void remove_sc(ioopm_hash_table_t *carts, ioopm_hash_table_t *merch_ht) {

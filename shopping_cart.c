@@ -12,7 +12,7 @@ struct cart_count{
 
 cart_count_t *initiate_cart_count() {
     cart_count_t *count = malloc(sizeof(cart_count_t));
-    count->id = 0;
+    count->id = 1;
     return count;
 }
 
