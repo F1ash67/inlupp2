@@ -82,9 +82,9 @@ typedef struct {
 // are fine here.
 static void add_item(store_t *s, char *name, size_t price, size_t stock, char *location)
 {
-    create_merch_item(s->merch_ht, name, "test description", price);
+    backend_create_merch_item(s->merch_ht, name, "test description", price);
     for (size_t i = 0; i < stock; i++) {
-        replenish_merch_item(s->storage_ht, s->merch_ht, name, location);
+        backend_replenish_merch_item(s->storage_ht, s->merch_ht, name, location);
     }
 }
 
@@ -95,7 +95,7 @@ static store_t setup(void)
     s.merch_ht = ioopm_hash_table_create(str_hash, str_eq);
     s.storage_ht = ioopm_hash_table_create(str_hash, str_eq);
     s.carts = ioopm_hash_table_create(int_hash, int_eq);
-    s.count = initiate_cart_count();
+    s.count = cart_initiate_cart_count();
     add_item(&s, "apple", 10, 5, "A01");
     add_item(&s, "banana", 3, 2, "B01");
     return s;
@@ -110,8 +110,8 @@ static void teardown(store_t *s)
     }
     ioopm_hash_table_iterator_destroy(it);
     ioopm_hash_table_destroy(s->carts);
-    destroy_cart_count(s->count);
-    destroy_all_merch(s->merch_ht, s->storage_ht);   // also destroys both tables
+    cart_destroy_cart_count(s->count);
+    backend_destroy_all_merch(s->merch_ht, s->storage_ht);   // also destroys both tables
 }
 
 static bool has_merch(store_t *s, char *name)
@@ -121,7 +121,7 @@ static bool has_merch(store_t *s, char *name)
 
 static size_t reserved_of(store_t *s, char *name)
 {
-    return get_reserved(find_merch_item(s->merch_ht, name));
+    return backend_get_reserved(backend_find_merch_item(s->merch_ht, name));
 }
 
 /* ------------------------------ add_merch ---------------------------- */
@@ -130,10 +130,10 @@ static void test_add_merch(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("pear\nA green fruit\n7\n", add_merch(s.merch_ht));
+    WITH_INPUT("pear\nA green fruit\n7\n", actions_add_merch(s.merch_ht));
 
     CU_ASSERT_TRUE(has_merch(&s, "pear"));
-    CU_ASSERT_EQUAL(get_price(find_merch_item(s.merch_ht, "pear")), 7);
+    CU_ASSERT_EQUAL(backend_get_price(backend_find_merch_item(s.merch_ht, "pear")), 7);
 
     teardown(&s);
 }
@@ -142,7 +142,7 @@ static void test_add_merch_negative_price(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("pear\nA green fruit\n-7\n", add_merch(s.merch_ht));
+    WITH_INPUT("pear\nA green fruit\n-7\n", actions_add_merch(s.merch_ht));
 
     CU_ASSERT_TRUE(printed("Invalid price"));
     CU_ASSERT_FALSE(has_merch(&s, "pear"));
@@ -156,7 +156,7 @@ static void test_list_merch(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("", list_merch_items(s.merch_ht));
+    WITH_INPUT("", actions_list_merch_items(s.merch_ht));
 
     CU_ASSERT_TRUE(printed("apple"));
     CU_ASSERT_TRUE(printed("banana"));
@@ -176,7 +176,7 @@ static void test_list_merch_stops_after_20_on_n(void)
     }
 
     // 27 items in total: it should ask after 20 and stop on "n"
-    WITH_INPUT("n\n", list_merch_items(s.merch_ht));
+    WITH_INPUT("n\n", actions_list_merch_items(s.merch_ht));
 
     CU_ASSERT_TRUE(printed("keep listing"));
     // Count printed names: exactly 20 lines before the question
@@ -196,7 +196,7 @@ static void test_remove_merch_confirmed(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("banana\ny\n", remove_merch(s.merch_ht, s.storage_ht));
+    WITH_INPUT("banana\ny\n", actions_remove_merch(s.merch_ht, s.storage_ht));
 
     CU_ASSERT_FALSE(has_merch(&s, "banana"));
     // Its shelf is freed up too
@@ -209,7 +209,7 @@ static void test_remove_merch_aborted(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("banana\nn\n", remove_merch(s.merch_ht, s.storage_ht));
+    WITH_INPUT("banana\nn\n", actions_remove_merch(s.merch_ht, s.storage_ht));
 
     CU_ASSERT_TRUE(printed("Aborting removal"));
     CU_ASSERT_TRUE(has_merch(&s, "banana"));
@@ -221,7 +221,7 @@ static void test_remove_merch_invalid_name(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("pear\n", remove_merch(s.merch_ht, s.storage_ht));
+    WITH_INPUT("pear\n", actions_remove_merch(s.merch_ht, s.storage_ht));
 
     CU_ASSERT_TRUE(printed("Invalid merch"));
     CU_ASSERT_TRUE(has_merch(&s, "apple"));
@@ -233,10 +233,10 @@ static void test_remove_merch_invalid_name(void)
 static void test_remove_merch_in_cart(void)
 {
     store_t s = setup();
-    size_t id = create_cart(s.carts, s.count);
-    add_to_cart(s.carts, s.merch_ht, id, "apple", 1);
+    size_t id = cart_create_cart(s.carts, s.count);
+    cart_add_to_cart(s.carts, s.merch_ht, id, "apple", 1);
 
-    WITH_INPUT("apple\n", remove_merch(s.merch_ht, s.storage_ht));
+    WITH_INPUT("apple\n", actions_remove_merch(s.merch_ht, s.storage_ht));
 
     CU_ASSERT_TRUE(printed("shopping cart"));
     CU_ASSERT_TRUE(has_merch(&s, "apple"));
@@ -250,13 +250,13 @@ static void test_edit_merch_confirmed(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("apple\ngreen apple\nSour\n12\ny\n", edit_merch(s.merch_ht, s.storage_ht));
+    WITH_INPUT("apple\ngreen apple\nSour\n12\ny\n", actions_edit_merch(s.merch_ht, s.storage_ht));
 
     CU_ASSERT_FALSE(has_merch(&s, "apple"));
     CU_ASSERT_TRUE(has_merch(&s, "green apple"));
-    CU_ASSERT_EQUAL(get_price(find_merch_item(s.merch_ht, "green apple")), 12);
+    CU_ASSERT_EQUAL(backend_get_price(backend_find_merch_item(s.merch_ht, "green apple")), 12);
     // Stock follows the item to its new name
-    CU_ASSERT_EQUAL(get_tot_stock(s.merch_ht, "green apple"), 5);
+    CU_ASSERT_EQUAL(backend_get_tot_stock(s.merch_ht, "green apple"), 5);
 
     teardown(&s);
 }
@@ -265,12 +265,12 @@ static void test_edit_merch_aborted(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("apple\ngreen apple\nSour\n12\nn\n", edit_merch(s.merch_ht, s.storage_ht));
+    WITH_INPUT("apple\ngreen apple\nSour\n12\nn\n", actions_edit_merch(s.merch_ht, s.storage_ht));
 
     CU_ASSERT_TRUE(printed("Aborting edit"));
     CU_ASSERT_TRUE(has_merch(&s, "apple"));
     CU_ASSERT_FALSE(has_merch(&s, "green apple"));
-    CU_ASSERT_EQUAL(get_price(find_merch_item(s.merch_ht, "apple")), 10);
+    CU_ASSERT_EQUAL(backend_get_price(backend_find_merch_item(s.merch_ht, "apple")), 10);
 
     teardown(&s);
 }
@@ -279,13 +279,13 @@ static void test_edit_merch_invalid_input(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("pear\n", edit_merch(s.merch_ht, s.storage_ht));
+    WITH_INPUT("pear\n", actions_edit_merch(s.merch_ht, s.storage_ht));
     CU_ASSERT_TRUE(printed("Invalid merch"));
 
-    WITH_INPUT("apple\ngreen apple\nSour\n-1\n", edit_merch(s.merch_ht, s.storage_ht));
+    WITH_INPUT("apple\ngreen apple\nSour\n-1\n", actions_edit_merch(s.merch_ht, s.storage_ht));
     CU_ASSERT_TRUE(printed("Invalid price"));
     CU_ASSERT_TRUE(has_merch(&s, "apple"));
-    CU_ASSERT_EQUAL(get_price(find_merch_item(s.merch_ht, "apple")), 10);
+    CU_ASSERT_EQUAL(backend_get_price(backend_find_merch_item(s.merch_ht, "apple")), 10);
 
     teardown(&s);
 }
@@ -293,10 +293,10 @@ static void test_edit_merch_invalid_input(void)
 static void test_edit_merch_in_cart(void)
 {
     store_t s = setup();
-    size_t id = create_cart(s.carts, s.count);
-    add_to_cart(s.carts, s.merch_ht, id, "apple", 1);
+    size_t id = cart_create_cart(s.carts, s.count);
+    cart_add_to_cart(s.carts, s.merch_ht, id, "apple", 1);
 
-    WITH_INPUT("apple\n", edit_merch(s.merch_ht, s.storage_ht));
+    WITH_INPUT("apple\n", actions_edit_merch(s.merch_ht, s.storage_ht));
 
     CU_ASSERT_TRUE(printed("shopping cart"));
     CU_ASSERT_TRUE(has_merch(&s, "apple"));
@@ -310,10 +310,10 @@ static void test_show_stock(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("apple\n", show_stock(s.merch_ht));
+    WITH_INPUT("apple\n", actions_show_stock(s.merch_ht));
     CU_ASSERT_TRUE(printed("A01: 5"));
 
-    WITH_INPUT("pear\n", show_stock(s.merch_ht));
+    WITH_INPUT("pear\n", actions_show_stock(s.merch_ht));
     CU_ASSERT_TRUE(printed("Invalid merch"));
 
     teardown(&s);
@@ -325,9 +325,9 @@ static void test_replenish_existing_shelf(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("A01\napple\n3\n", replenish(s.merch_ht, s.storage_ht));
+    WITH_INPUT("A01\napple\n3\n", actions_replenish(s.merch_ht, s.storage_ht));
 
-    CU_ASSERT_EQUAL(get_tot_stock(s.merch_ht, "apple"), 8);
+    CU_ASSERT_EQUAL(backend_get_tot_stock(s.merch_ht, "apple"), 8);
 
     teardown(&s);
 }
@@ -336,9 +336,9 @@ static void test_replenish_new_shelf(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("A02\napple\n4\n", replenish(s.merch_ht, s.storage_ht));
+    WITH_INPUT("A02\napple\n4\n", actions_replenish(s.merch_ht, s.storage_ht));
 
-    CU_ASSERT_EQUAL(get_tot_stock(s.merch_ht, "apple"), 9);
+    CU_ASSERT_EQUAL(backend_get_tot_stock(s.merch_ht, "apple"), 9);
     CU_ASSERT_TRUE(ioopm_hash_table_has_key(s.storage_ht, string_elem("A02")));
 
     teardown(&s);
@@ -348,25 +348,25 @@ static void test_replenish_invalid_input(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("A01\npear\n2\n", replenish(s.merch_ht, s.storage_ht));
+    WITH_INPUT("A01\npear\n2\n", actions_replenish(s.merch_ht, s.storage_ht));
     CU_ASSERT_TRUE(printed("Invalid merch"));
 
-    WITH_INPUT("A01\napple\n0\n", replenish(s.merch_ht, s.storage_ht));
+    WITH_INPUT("A01\napple\n0\n", actions_replenish(s.merch_ht, s.storage_ht));
     CU_ASSERT_TRUE(printed("Invalid amount"));
 
-    WITH_INPUT("A01\napple\n-3\n", replenish(s.merch_ht, s.storage_ht));
+    WITH_INPUT("A01\napple\n-3\n", actions_replenish(s.merch_ht, s.storage_ht));
     CU_ASSERT_TRUE(printed("Invalid amount"));
 
     // B01 belongs to banana
-    WITH_INPUT("B01\napple\n2\n", replenish(s.merch_ht, s.storage_ht));
+    WITH_INPUT("B01\napple\n2\n", actions_replenish(s.merch_ht, s.storage_ht));
     CU_ASSERT_TRUE(printed("Invalid location"));
 
-    WITH_INPUT("XYZ\napple\n2\n", replenish(s.merch_ht, s.storage_ht));
+    WITH_INPUT("XYZ\napple\n2\n", actions_replenish(s.merch_ht, s.storage_ht));
     CU_ASSERT_TRUE(printed("Invalid location"));
 
     // None of these changed the stock
-    CU_ASSERT_EQUAL(get_tot_stock(s.merch_ht, "apple"), 5);
-    CU_ASSERT_EQUAL(get_tot_stock(s.merch_ht, "banana"), 2);
+    CU_ASSERT_EQUAL(backend_get_tot_stock(s.merch_ht, "apple"), 5);
+    CU_ASSERT_EQUAL(backend_get_tot_stock(s.merch_ht, "banana"), 2);
 
     teardown(&s);
 }
@@ -377,10 +377,10 @@ static void test_create_sc(void)
 {
     store_t s = setup();
 
-    WITH_INPUT("", create_sc(s.carts, s.count));
+    WITH_INPUT("", actions_create_sc(s.carts, s.count));
     CU_ASSERT_TRUE(printed("Created shopping cart 1"));
 
-    WITH_INPUT("", create_sc(s.carts, s.count));
+    WITH_INPUT("", actions_create_sc(s.carts, s.count));
     CU_ASSERT_TRUE(printed("Created shopping cart 2"));
 
     CU_ASSERT_EQUAL(ioopm_hash_table_size(s.carts), 2);
@@ -391,18 +391,18 @@ static void test_create_sc(void)
 static void test_remove_sc(void)
 {
     store_t s = setup();
-    size_t id = create_cart(s.carts, s.count);
-    add_to_cart(s.carts, s.merch_ht, id, "apple", 2);
+    size_t id = cart_create_cart(s.carts, s.count);
+    cart_add_to_cart(s.carts, s.merch_ht, id, "apple", 2);
 
-    WITH_INPUT("1\nn\n", remove_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\nn\n", actions_remove_sc(s.carts, s.merch_ht));
     CU_ASSERT_TRUE(printed("Aborting removal"));
     CU_ASSERT_EQUAL(ioopm_hash_table_size(s.carts), 1);
 
-    WITH_INPUT("1\ny\n", remove_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\ny\n", actions_remove_sc(s.carts, s.merch_ht));
     CU_ASSERT_EQUAL(ioopm_hash_table_size(s.carts), 0);
     CU_ASSERT_EQUAL(reserved_of(&s, "apple"), 0);
 
-    WITH_INPUT("1\ny\n", remove_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\ny\n", actions_remove_sc(s.carts, s.merch_ht));
     CU_ASSERT_TRUE(printed("Invalid id"));
 
     teardown(&s);
@@ -413,12 +413,12 @@ static void test_remove_sc(void)
 static void test_add_to_sc(void)
 {
     store_t s = setup();
-    create_cart(s.carts, s.count);
+    cart_create_cart(s.carts, s.count);
 
-    WITH_INPUT("1\napple\n3\n", add_to_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\napple\n3\n", actions_add_to_sc(s.carts, s.merch_ht));
 
     CU_ASSERT_EQUAL(reserved_of(&s, "apple"), 3);
-    CU_ASSERT_EQUAL(calculate_cost(s.carts, s.merch_ht, 1), 30);
+    CU_ASSERT_EQUAL(cart_calculate_cost(s.carts, s.merch_ht, 1), 30);
 
     teardown(&s);
 }
@@ -426,19 +426,19 @@ static void test_add_to_sc(void)
 static void test_add_to_sc_invalid_input(void)
 {
     store_t s = setup();
-    create_cart(s.carts, s.count);
+    cart_create_cart(s.carts, s.count);
 
-    WITH_INPUT("7\napple\n1\n", add_to_sc(s.carts, s.merch_ht));
+    WITH_INPUT("7\napple\n1\n", actions_add_to_sc(s.carts, s.merch_ht));
     CU_ASSERT_TRUE(printed("Invalid id"));
 
-    WITH_INPUT("1\napple\n0\n", add_to_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\napple\n0\n", actions_add_to_sc(s.carts, s.merch_ht));
     CU_ASSERT_TRUE(printed("Invalid amount"));
 
-    WITH_INPUT("1\napple\n6\n", add_to_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\napple\n6\n", actions_add_to_sc(s.carts, s.merch_ht));
     CU_ASSERT_TRUE(printed("Only 5 available"));
 
     CU_ASSERT_EQUAL(reserved_of(&s, "apple"), 0);
-    CU_ASSERT_EQUAL(calculate_cost(s.carts, s.merch_ht, 1), 0);
+    CU_ASSERT_EQUAL(cart_calculate_cost(s.carts, s.merch_ht, 1), 0);
 
     teardown(&s);
 }
@@ -446,17 +446,17 @@ static void test_add_to_sc_invalid_input(void)
 static void test_remove_from_sc(void)
 {
     store_t s = setup();
-    size_t id = create_cart(s.carts, s.count);
-    add_to_cart(s.carts, s.merch_ht, id, "apple", 3);
+    size_t id = cart_create_cart(s.carts, s.count);
+    cart_add_to_cart(s.carts, s.merch_ht, id, "apple", 3);
 
-    WITH_INPUT("1\napple\n2\n", remove_from_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\napple\n2\n", actions_remove_from_sc(s.carts, s.merch_ht));
     CU_ASSERT_EQUAL(reserved_of(&s, "apple"), 1);
-    CU_ASSERT_EQUAL(calculate_cost(s.carts, s.merch_ht, 1), 10);
+    CU_ASSERT_EQUAL(cart_calculate_cost(s.carts, s.merch_ht, 1), 10);
 
-    WITH_INPUT("1\napple\n5\n", remove_from_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\napple\n5\n", actions_remove_from_sc(s.carts, s.merch_ht));
     CU_ASSERT_TRUE(printed("You only have 1 items"));
 
-    WITH_INPUT("7\napple\n1\n", remove_from_sc(s.carts, s.merch_ht));
+    WITH_INPUT("7\napple\n1\n", actions_remove_from_sc(s.carts, s.merch_ht));
     CU_ASSERT_TRUE(printed("Invalid id"));
 
     CU_ASSERT_EQUAL(reserved_of(&s, "apple"), 1);
@@ -469,14 +469,14 @@ static void test_remove_from_sc(void)
 static void test_calculate_sc(void)
 {
     store_t s = setup();
-    size_t id = create_cart(s.carts, s.count);
-    add_to_cart(s.carts, s.merch_ht, id, "apple", 2);
-    add_to_cart(s.carts, s.merch_ht, id, "banana", 1);
+    size_t id = cart_create_cart(s.carts, s.count);
+    cart_add_to_cart(s.carts, s.merch_ht, id, "apple", 2);
+    cart_add_to_cart(s.carts, s.merch_ht, id, "banana", 1);
 
-    WITH_INPUT("1\n", calculate_sc(s.carts, s.merch_ht));
+    WITH_INPUT("1\n", actions_calculate_sc(s.carts, s.merch_ht));
     CU_ASSERT_TRUE(printed("Your items cost 23kr"));
 
-    WITH_INPUT("7\n", calculate_sc(s.carts, s.merch_ht));
+    WITH_INPUT("7\n", actions_calculate_sc(s.carts, s.merch_ht));
     CU_ASSERT_TRUE(printed("Invalid id"));
     CU_ASSERT_FALSE(printed("cost"));
 
@@ -486,15 +486,15 @@ static void test_calculate_sc(void)
 static void test_checkout_sc(void)
 {
     store_t s = setup();
-    size_t id = create_cart(s.carts, s.count);
-    add_to_cart(s.carts, s.merch_ht, id, "apple", 2);
+    size_t id = cart_create_cart(s.carts, s.count);
+    cart_add_to_cart(s.carts, s.merch_ht, id, "apple", 2);
 
-    WITH_INPUT("1\n", checkout_sc(s.carts, s.merch_ht, s.storage_ht));
-    CU_ASSERT_EQUAL(get_tot_stock(s.merch_ht, "apple"), 3);
+    WITH_INPUT("1\n", actions_checkout_sc(s.carts, s.merch_ht, s.storage_ht));
+    CU_ASSERT_EQUAL(backend_get_tot_stock(s.merch_ht, "apple"), 3);
     CU_ASSERT_EQUAL(reserved_of(&s, "apple"), 0);
     CU_ASSERT_EQUAL(ioopm_hash_table_size(s.carts), 0);
 
-    WITH_INPUT("1\n", checkout_sc(s.carts, s.merch_ht, s.storage_ht));
+    WITH_INPUT("1\n", actions_checkout_sc(s.carts, s.merch_ht, s.storage_ht));
     CU_ASSERT_TRUE(printed("Invalid id"));
 
     teardown(&s);
@@ -506,10 +506,10 @@ static void test_quit(void)
 {
     int result;
 
-    WITH_INPUT("y\n", result = quit());
+    WITH_INPUT("y\n", result = actions_quit());
     CU_ASSERT_EQUAL(result, -1);
 
-    WITH_INPUT("n\n", result = quit());
+    WITH_INPUT("n\n", result = actions_quit());
     CU_ASSERT_EQUAL(result, 0);
     CU_ASSERT_TRUE(printed("Aborting exit"));
 }
@@ -520,16 +520,16 @@ static void test_event_loop(void)
     int result;
 
     // Lowercase menu choices work too
-    WITH_INPUT("c\n", result = event_loop(s.merch_ht, s.storage_ht, s.carts, s.count));
+    WITH_INPUT("c\n", result = actions_event_loop(s.merch_ht, s.storage_ht, s.carts, s.count));
     CU_ASSERT_EQUAL(result, 0);
     CU_ASSERT_EQUAL(ioopm_hash_table_size(s.carts), 1);
 
     // An invalid choice shows the menu again until a valid one is given
-    WITH_INPUT("x\n+\n1\nbanana\n1\n", result = event_loop(s.merch_ht, s.storage_ht, s.carts, s.count));
+    WITH_INPUT("x\n+\n1\nbanana\n1\n", result = actions_event_loop(s.merch_ht, s.storage_ht, s.carts, s.count));
     CU_ASSERT_TRUE(printed("Please enter a valid option"));
     CU_ASSERT_EQUAL(reserved_of(&s, "banana"), 1);
 
-    WITH_INPUT("q\ny\n", result = event_loop(s.merch_ht, s.storage_ht, s.carts, s.count));
+    WITH_INPUT("q\ny\n", result = actions_event_loop(s.merch_ht, s.storage_ht, s.carts, s.count));
     CU_ASSERT_EQUAL(result, -1);
 
     teardown(&s);
