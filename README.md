@@ -1,4 +1,4 @@
-**Authors: Otis Hildebrand & Edvin Falt**
+**Authors: Otis Hildebrand & Edvin Fältenhag**
 
 ## Building the program
 To build the program, run `make all`
