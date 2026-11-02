@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
-#include <assert.h>
 #include "backend.h"
 #include "../../lib/hash_table_general_key.h"
 #include "../../lib/hash_table_iterator.h"
@@ -149,7 +148,7 @@ void backend_edit_merch_item(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *s
   ioopm_list_t *stock_list = backend_get_stock_list(merch_ht, name);
 
   elem_t result;
-  assert(ioopm_hash_table_remove(merch_ht, string_elem(name), &result));
+  ioopm_hash_table_remove(merch_ht, string_elem(name), &result);
   free(merch->name);
   free(merch->desc);
   merch->name = strdup(new_name);
