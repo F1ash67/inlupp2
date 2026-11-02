@@ -1,10 +1,10 @@
 #include <CUnit/Basic.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include "hash_table_general_key.h"
-#include "hash_table_iterator_general_key.h"
-#include "shopping_cart.h"
-#include "backend.h"
+#include "../lib/hash_table_general_key.h"
+#include "../lib/hash_table_iterator_general_key.h"
+#include "../src/backend/shopping_cart.h"
+#include "../src/backend/backend.h"
 
 //To-Do: Review test validity
 

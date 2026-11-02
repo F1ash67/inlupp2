@@ -6,11 +6,11 @@
 #include <ctype.h>
 #include <assert.h>
 #include "backend.h"
-#include "hash_table_general_key.h"
-#include "hash_table_iterator.h"
-#include "linked_list.h"
-#include "linked_list_iterator.h"
-#include "common.h"
+#include "../../lib/hash_table_general_key.h"
+#include "../../lib/hash_table_iterator.h"
+#include "../../lib/linked_list.h"
+#include "../../lib/linked_list_iterator.h"
+#include "../../lib/common.h"
 
 struct merch
 {

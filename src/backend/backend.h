@@ -1,8 +1,21 @@
 #pragma once
 
 #include <stdbool.h>
-#include "hash_table_general_key.h"
-#include "linked_list.h"
+#include "../../lib/hash_table_general_key.h"
+#include "../../lib/linked_list.h"
+
+/**
+ * @file backend.h
+ * @brief code for handling the backend of the webstore, mainly the storing
+ * and buying of merch items
+ * 
+ * A merch item is stored using a linked list of shelves represented by a 
+ * location code and the quantity of merch currently stored. The shelves are
+ * stored in both the merch items themselves but also in a seperate hash table
+ * to be able to quickly check if a location is occupied. The merch is then
+ * also stored in a different hash table.
+ */
+
 
 /// @brief A struct to store a merch item, stores details like name, description,
 /// price, a list of storage locations saved as shelves as well as the amount

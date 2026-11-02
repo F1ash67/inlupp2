@@ -4,14 +4,14 @@
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
-#include "utils.h"
+#include "../../lib/utils.h"
 #include "actions.h"
-#include "backend.h"
-#include "hash_table_general_key.h"
-#include "hash_table_iterator_general_key.h"
-#include "linked_list.h"
-#include "linked_list_iterator.h"
-#include "shopping_cart.h"
+#include "../backend/backend.h"
+#include "../../lib/hash_table_general_key.h"
+#include "../../lib/hash_table_iterator_general_key.h"
+#include "../../lib/linked_list.h"
+#include "../../lib/linked_list_iterator.h"
+#include "../backend/shopping_cart.h"
 
 static void print_menu(void)
 {

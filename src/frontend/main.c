@@ -1,7 +1,7 @@
 #include "actions.h"
-#include "shopping_cart.h"
-#include "hash_table_general_key.h"
-#include "backend.h"
+#include "../backend/shopping_cart.h"
+#include "../../lib/hash_table_general_key.h"
+#include "../backend/backend.h"
 #include <stdio.h>
 
 int main(int argc, char *argv[]) {
