@@ -63,39 +63,39 @@ static shelf_t *create_shelf(char *location, int quantity)
   return shelf;
 }
 
-char *get_location(shelf_t *shelf) {
+char *backend_get_location(shelf_t *shelf) {
   return shelf->location;
 }
 
-size_t get_quantity(shelf_t *shelf) {
+size_t backend_get_quantity(shelf_t *shelf) {
   return shelf->quantity;
 }
 
-size_t get_price(merch_t *merch)
+size_t backend_get_price(merch_t *merch)
 {
   return merch->price;
 }
 
-size_t get_reserved(merch_t *merch) {
+size_t backend_get_reserved(merch_t *merch) {
   return merch->reserved;
 }
 
-void reserve(merch_t *merch, size_t amount) {
-  size_t current = get_reserved(merch);
+void backend_reserve(merch_t *merch, size_t amount) {
+  size_t current = backend_get_reserved(merch);
   merch->reserved = current + amount;
 }
 
-void unreserve(merch_t *merch, size_t amount) {
-  size_t current = get_reserved(merch);
+void backend_unreserve(merch_t *merch, size_t amount) {
+  size_t current = backend_get_reserved(merch);
   merch->reserved = current - amount;
 }
 
-char *get_name(merch_t *merch)
+char *backend_get_name(merch_t *merch)
 {
   return merch->name;
 }
 
-merch_t *find_merch_item(ioopm_hash_table_t *merch_ht, char *name)
+merch_t *backend_find_merch_item(ioopm_hash_table_t *merch_ht, char *name)
 {
   elem_t result;
 
@@ -104,13 +104,13 @@ merch_t *find_merch_item(ioopm_hash_table_t *merch_ht, char *name)
   return merch;
 }
 
-static void destroy_shelf(shelf_t *shelf)
+static void backend_destroy_shelf(shelf_t *shelf)
 {
   free(shelf->location);
   free(shelf);
 }
 
-merch_t *create_merch_item(ioopm_hash_table_t *merch_ht, char *name, char *desc, size_t price)
+merch_t *backend_create_merch_item(ioopm_hash_table_t *merch_ht, char *name, char *desc, size_t price)
 {
   merch_t *merch = calloc(1, sizeof(merch_t));
   merch->name = strdup(name);
@@ -122,17 +122,17 @@ merch_t *create_merch_item(ioopm_hash_table_t *merch_ht, char *name, char *desc,
   return merch;
 }
 
-void remove_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *merch_ht, char *name)
+void backend_remove_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *merch_ht, char *name)
 {
-  merch_t *merch = find_merch_item(merch_ht, name);
-  ioopm_list_t *list = get_stock_list(merch_ht, name);
+  merch_t *merch = backend_find_merch_item(merch_ht, name);
+  ioopm_list_t *list = backend_get_stock_list(merch_ht, name);
   elem_t result;
   ioopm_list_iterator_t *it = ioopm_list_iterator_create(list);
   while (!ioopm_list_iterator_at_end(it))
   {
     shelf_t *shelf = ioopm_list_iterator_remove(it).p;
     ioopm_hash_table_remove(storage_ht, string_elem(shelf->location), &result);
-    destroy_shelf(shelf);
+    backend_destroy_shelf(shelf);
   }
   ioopm_list_iterator_destroy(it);
 
@@ -143,10 +143,10 @@ void remove_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *merch
   free(merch);
 }
 
-void edit_merch_item(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, char *name, char *new_name, char *new_desc, size_t new_price)
+void backend_edit_merch_item(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, char *name, char *new_name, char *new_desc, size_t new_price)
 {
-  merch_t *merch = find_merch_item(merch_ht, name);
-  ioopm_list_t *stock_list = get_stock_list(merch_ht, name);
+  merch_t *merch = backend_find_merch_item(merch_ht, name);
+  ioopm_list_t *stock_list = backend_get_stock_list(merch_ht, name);
 
   elem_t result;
   assert(ioopm_hash_table_remove(merch_ht, string_elem(name), &result));
@@ -168,12 +168,12 @@ void edit_merch_item(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_h
   ioopm_list_iterator_destroy(stock_list_iter);
 }
 
-bool merch_item_exists(ioopm_hash_table_t* merch_ht, char *name)
+bool backend_merch_item_exists(ioopm_hash_table_t* merch_ht, char *name)
 {
   return(ioopm_hash_table_has_key(merch_ht, string_elem(name)));
 }
 
-ioopm_list_t *list_merch(ioopm_hash_table_t *merch_ht)
+ioopm_list_t *backend_list_merch(ioopm_hash_table_t *merch_ht)
 {
   ioopm_hash_table_iterator_t *merch_it = ioopm_hash_table_iterator_create(merch_ht);
   ioopm_list_t *merch_list = ioopm_list_create();
@@ -186,9 +186,9 @@ ioopm_list_t *list_merch(ioopm_hash_table_t *merch_ht)
   return merch_list;
 }
 
-bool replenish_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *merch_ht, char *name, char *location)
+bool backend_replenish_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *merch_ht, char *name, char *location)
 {
-  ioopm_list_t *stock_list = get_stock_list(merch_ht, name);
+  ioopm_list_t *stock_list = backend_get_stock_list(merch_ht, name);
   ioopm_list_iterator_t *stock_list_iter = ioopm_list_iterator_create(stock_list);
   while (!ioopm_list_iterator_at_end(stock_list_iter))
   {
@@ -208,16 +208,16 @@ bool replenish_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_table_t *me
     return false;
 
   shelf_t *new_shelf = create_shelf(strdup(location), 1);
-  merch_t *merch = find_merch_item(merch_ht, name);
+  merch_t *merch = backend_find_merch_item(merch_ht, name);
   ioopm_hash_table_insert(storage_ht, string_elem(new_shelf->location), string_elem(get_name(merch)));
   ioopm_list_append(stock_list, ptr_elem(new_shelf));
   return true;
 }
 
-bool remove_stock(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, char *name, size_t amt)
+bool backend_remove_stock(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, char *name, size_t amt)
 {
-  if(amt > get_tot_stock(merch_ht, name)) return false;
-  ioopm_list_t *stock_list = get_stock_list(merch_ht, name);
+  if(amt > backend_get_tot_stock(merch_ht, name)) return false;
+  ioopm_list_t *stock_list = backend_get_stock_list(merch_ht, name);
   ioopm_list_iterator_t *stock_list_iter = ioopm_list_iterator_create(stock_list);
   for (size_t i = 0; i < amt; i++)
   {
@@ -230,22 +230,22 @@ bool remove_stock(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht, 
 
       elem_t result;
       ioopm_hash_table_remove(storage_ht, string_elem(location), &result);
-      destroy_shelf(current);
+      backend_destroy_shelf(current);
     }
   }
   ioopm_list_iterator_destroy(stock_list_iter);
   return true;
 }
 
-ioopm_list_t *get_stock_list(ioopm_hash_table_t *merch_ht, char *name)
+ioopm_list_t *backend_get_stock_list(ioopm_hash_table_t *merch_ht, char *name)
 {
-  merch_t *merch = find_merch_item(merch_ht, name);
+  merch_t *merch = backend_find_merch_item(merch_ht, name);
   return merch->locs;
 }
 
-size_t get_tot_stock(ioopm_hash_table_t *merch_ht, char *name)
+size_t backend_get_tot_stock(ioopm_hash_table_t *merch_ht, char *name)
 {
-  ioopm_list_t *list = get_stock_list(merch_ht, name);
+  ioopm_list_t *list = backend_get_stock_list(merch_ht, name);
   ioopm_list_iterator_t *it = ioopm_list_iterator_create(list);
   size_t tot = 0;
   while (!ioopm_list_iterator_at_end(it))
@@ -259,7 +259,7 @@ size_t get_tot_stock(ioopm_hash_table_t *merch_ht, char *name)
   return tot;
 }
 
-void destroy_all_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht)
+void backend_destroy_all_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage_ht)
 {
   while (!ioopm_hash_table_is_empty(merch_ht))
   {
@@ -271,7 +271,7 @@ void destroy_all_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storage
 
     ioopm_hash_table_iterator_destroy(it);
 
-    remove_merch_item(storage_ht, merch_ht, name);
+    backend_remove_merch_item(storage_ht, merch_ht, name);
   }
   ioopm_hash_table_destroy(merch_ht);
   ioopm_hash_table_destroy(storage_ht);

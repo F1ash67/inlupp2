@@ -16,12 +16,12 @@ int main(int argc, char *argv[]) {
     ioopm_hash_table_t *merch_ht = ioopm_hash_table_create(str_hash, str_eq);
     ioopm_hash_table_t *storage_ht = ioopm_hash_table_create(str_hash, str_eq);
     ioopm_hash_table_t *cart_ht = ioopm_hash_table_create(int_hash, int_eq);
-    cart_count_t *count = initiate_cart_count();
+    cart_count_t *count = cart_initiate_cart_count();
 
-    while(event_loop(merch_ht, storage_ht, cart_ht, count) != -1);
+    while(actions_event_loop(merch_ht, storage_ht, cart_ht, count) != -1);
 
-    destroy_carts(cart_ht, merch_ht);
-    destroy_all_merch(merch_ht, storage_ht);
-    destroy_cart_count(count);
+    cart_destroy_carts(cart_ht, merch_ht);
+    backend_destroy_all_merch(merch_ht, storage_ht);
+    cart_destroy_cart_count(count);
     return 0;
 }
