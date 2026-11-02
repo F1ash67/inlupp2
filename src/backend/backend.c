@@ -209,7 +209,7 @@ bool backend_replenish_merch_item(ioopm_hash_table_t *storage_ht, ioopm_hash_tab
 
   shelf_t *new_shelf = create_shelf(strdup(location), 1);
   merch_t *merch = backend_find_merch_item(merch_ht, name);
-  ioopm_hash_table_insert(storage_ht, string_elem(new_shelf->location), string_elem(get_name(merch)));
+  ioopm_hash_table_insert(storage_ht, string_elem(new_shelf->location), string_elem(backend_get_name(merch)));
   ioopm_list_append(stock_list, ptr_elem(new_shelf));
   return true;
 }

@@ -153,7 +153,7 @@ void actions_edit_merch(ioopm_hash_table_t *merch_ht, ioopm_hash_table_t *storag
     }
 
     if(ask_confirm("Confirm edit (Y/y):")) {
-        edit_merch_item(merch_ht, storage_ht, old_name, new_name, new_desc, new_price);
+        backend_edit_merch_item(merch_ht, storage_ht, old_name, new_name, new_desc, new_price);
         free(old_name);
         free(new_name);
         free(new_desc);
