@@ -6,11 +6,11 @@
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
-#include "hash_table_general_key.h"
-#include "hash_table_iterator_general_key.h"
-#include "backend.h"
-#include "shopping_cart.h"
-#include "actions.h"
+#include "../lib/hash_table_general_key.h"
+#include "../lib/hash_table_iterator_general_key.h"
+#include "../src/backend/backend.h"
+#include "../src/backend/shopping_cart.h"
+#include "../src/frontend/actions.h"
 
 //To-Do: Review test validity
 

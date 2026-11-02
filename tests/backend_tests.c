@@ -1,6 +1,6 @@
 #include <CUnit/Basic.h>
-#include "backend.h"
-#include "hash_table_general_key.h"
+#include "../src/backend/backend.h"
+#include "../lib/hash_table_general_key.h"
 
 int init_suite(void)
 {

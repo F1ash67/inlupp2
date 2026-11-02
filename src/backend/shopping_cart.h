@@ -16,7 +16,7 @@
 #pragma once
 
 #include <stdlib.h>
-#include "hash_table_general_key.h"
+#include "../../lib/hash_table_general_key.h"
 
 /// @brief A struct containg a size_t element to give a new shopping cart an unused id
 typedef struct cart_count cart_count_t;
